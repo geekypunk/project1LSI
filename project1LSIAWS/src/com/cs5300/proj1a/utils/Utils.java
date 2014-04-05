@@ -8,7 +8,6 @@ import java.io.StringWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Enumeration;
@@ -26,6 +25,7 @@ public class Utils {
 	 * @return Date
 	 */
 	public static String SERVER_IP="";
+	public static int sessionNumber = 0;
 	private final static Logger LOGGER = Logger.getLogger(Utils.class.getName());
 	public static long getCurrentTimeInMillis(){
 		Date date= new Date();

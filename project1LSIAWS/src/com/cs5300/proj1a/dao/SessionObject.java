@@ -1,6 +1,5 @@
 package com.cs5300.proj1a.dao;
 import java.util.Date;
-import java.util.UUID;
 
 import com.cs5300.proj1a.utils.Utils;
 
@@ -18,10 +17,11 @@ public class SessionObject {
 	
 	public SessionObject(String message,long expTs) throws Exception{
 		
-		this.sessionId = UUID.randomUUID().toString()+Utils.SERVER_IP;
+		this.sessionId = Utils.sessionNumber+"_"+Utils.SERVER_IP;
 		this.version = 0;
 		this.message = message;
 		this.expirationTs = expTs;
+		Utils.sessionNumber++;
 	}
 	/**
 	 * @return the sessionId

@@ -3,12 +3,10 @@ package com.cs5300.proj1a.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -40,7 +38,7 @@ public class SessionManager extends HttpServlet {
     public static int cookieAge = 1000*60*5; 
     
     //Cookie name
-    public static String COOKIE_NAME="CS5300PROJ1SESSIONKT466";
+    public static String COOKIE_NAME="CS5300PROJ1SESSION";
     
     private final static Logger LOGGER = Logger.getLogger(SessionManager.class.getName());
     
@@ -48,8 +46,9 @@ public class SessionManager extends HttpServlet {
      * @see HttpServlet#HttpServlet()
      */
     public SessionManager() {
-        super();
-        // TODO Auto-generated constructor stub
+       
+    	super();
+       
     }
 
     /**
@@ -100,11 +99,11 @@ public class SessionManager extends HttpServlet {
 		    	//Create a new session object
 		    	SessionObject sessionObj = new SessionObject(defaultServerMsg,Utils.getCurrentTimeInMillis()+cookieAge);
 		    	sessionObj.setMessage(defaultServerMsg);
-		    	String sessionIDWithVersion = sessionObj.getSessionIdWithVersion();
-		    	System.out.println("Creating session:"+sessionIDWithVersion);
-		        Cookie c = new Cookie(COOKIE_NAME, sessionIDWithVersion);
+		    	String sessionID = sessionObj.getSessionId();
+		    	System.out.println("Creating session:"+sessionID);
+		        Cookie c = new Cookie(COOKIE_NAME, sessionID);
 		        c.setMaxAge(cookieAge/1000);
-		        sessionTable.put(sessionIDWithVersion, sessionObj);
+		        sessionTable.put(sessionID, sessionObj);
 		        response.addCookie(c);
 		        responseWriter.write(sessionObj.toString());
 		   
@@ -114,37 +113,42 @@ public class SessionManager extends HttpServlet {
 		    	//should return a new session object with incremented version number.
 		    	//Hitting F5 will also invoke the below code
 		    	SessionObject sessionObj = sessionTable.get(sessionIdFromCookie);
-		    	//sessionObj.incrementVersionNo();
+		    	sessionObj.incrementVersionNo();
+		    	sessionObj.setExpirationTs(Utils.getCurrentTimeInMillis()+cookieAge);
+		    	String sessionID = sessionObj.getSessionId();
 		    	//Create a new session object with incremented version
-		    	SessionObject newSessionObj = generateNewSessionObjectWithIncrementedVersion(sessionObj);
+		    	//SessionObject newSessionObj = generateNewSessionObjectWithIncrementedVersion(sessionObj);
 		    	//For new object
-		    	String sessionIDWithVersion = newSessionObj.getSessionIdWithVersion();
+		    	//String sessionIDWithVersion = newSessionObj.getSessionIdWithVersion();
 		    	//Put the new session object with incremented session version in the session table
-		    	sessionTable.put(sessionIDWithVersion, newSessionObj);
+		    	//sessionTable.put(sessionIDWithVersion, newSessionObj);
 		    	
-		    	System.out.println("Creating session:"+sessionIDWithVersion+" with version :"+sessionObj.getVersion());
+		    	System.out.println("Creating session:"+sessionID+" with version :"+sessionObj.getVersion());
 		    	//Old cookie is overwritten, all new requests will be handled using this cookie.
-		    	Cookie c = new Cookie(COOKIE_NAME, sessionIDWithVersion);
+		    	Cookie c = new Cookie(COOKIE_NAME, sessionID);
 		    	//This new cookie will have default expiration timeout
 		    	c.setMaxAge(cookieAge/1000);
 		    	response.addCookie(c);
-		    	responseWriter.write(newSessionObj.toString());
+		    	responseWriter.write(sessionObj.toString());
 		    }
 	    
 	    }else if(requestType.equalsIgnoreCase("refresh")){
 
 	    	//Handle refresh button
 	    	SessionObject sessionObj = sessionTable.get(sessionIdFromCookie);
+	    	sessionObj.incrementVersionNo();
+	    	sessionObj.setExpirationTs(Utils.getCurrentTimeInMillis()+cookieAge);
+	    	String sessionID = sessionObj.getSessionId();
 	    	//Create a new session object with incremented version
-	    	SessionObject newSessionObj = generateNewSessionObjectWithIncrementedVersion(sessionObj);
+	    	//SessionObject newSessionObj = generateNewSessionObjectWithIncrementedVersion(sessionObj);
 	    	//For new object
-	    	String sessionIDWithVersion = newSessionObj.getSessionIdWithVersion();
+	    	//String sessionIDWithVersion = newSessionObj.getSessionIdWithVersion();
 	    	//Put the new session object with incremented session version in the session table
-	    	sessionTable.put(sessionIDWithVersion, newSessionObj);
-	    	Cookie c = new Cookie(COOKIE_NAME, sessionIDWithVersion);
+	    	//sessionTable.put(sessionIDWithVersion, sessionObj);
+	    	Cookie c = new Cookie(COOKIE_NAME, sessionID);
 	    	c.setMaxAge(cookieAge/1000);
 	    	response.addCookie(c);
-	    	responseWriter.write(newSessionObj.toString());
+	    	responseWriter.write(sessionObj.toString());
 	    }
 	    
 	    else if( requestType.equalsIgnoreCase("replace")){
@@ -152,16 +156,20 @@ public class SessionManager extends HttpServlet {
 	    	String newMessage = request.getParameter("message");
 	    	//Handle replace button
 	    	SessionObject sessionObj = sessionTable.get(sessionIdFromCookie);
+	    	sessionObj.setMessage(newMessage);
+	    	sessionObj.incrementVersionNo();
+	    	sessionObj.setExpirationTs(Utils.getCurrentTimeInMillis()+cookieAge);
+	    	String sessionID = sessionObj.getSessionId();
 	    	//Create a new session object with incremented version
-	    	SessionObject newSessionObj = generateNewSessionObjectWithIncrementedVersion(sessionObj,newMessage);
+	    	//SessionObject newSessionObj = generateNewSessionObjectWithIncrementedVersion(sessionObj,newMessage);
 	    	//For new object
-	    	String sessionIDWithVersion = newSessionObj.getSessionIdWithVersion();
+	    	//String sessionIDWithVersion = newSessionObj.getSessionIdWithVersion();
 	    	//Put the new session object with incremented session version in the session table
-	    	sessionTable.put(sessionIDWithVersion, newSessionObj);
-	    	Cookie c = new Cookie(COOKIE_NAME, sessionIDWithVersion);
+	    	//sessionTable.put(sessionIDWithVersion, sessionObj);
+	    	Cookie c = new Cookie(COOKIE_NAME, sessionID);
 	    	c.setMaxAge(cookieAge/1000);
 	    	response.addCookie(c);
-	    	responseWriter.write(newSessionObj.toString());
+	    	responseWriter.write(sessionObj.toString());
 	    }else{
 	    	
 	    	//Handle logout button
@@ -186,34 +194,11 @@ public class SessionManager extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+		
 	}
 	
 	
 	
-	/**
-	 * Create a new session object with an incremented version from an existing session object
-	 * @return SessionObject
-	 * @throws Exception 
-	 */
-	private static SessionObject generateNewSessionObjectWithIncrementedVersion(SessionObject old) throws Exception {
-		SessionObject newObj = new SessionObject(old.getMessage(),old.getExpirationTs()+cookieAge);
-		newObj.setSessionId(old.getSessionId());
-		newObj.setVersion(old.getVersion()+1);
-	    return newObj;
-	 }
-	
-	/**
-	 * Create a new session object with an incremented version and a new message from an existing session object
-	 * @return SessionObject
-	 * @throws Exception 
-	 */
-	private static SessionObject generateNewSessionObjectWithIncrementedVersion(SessionObject old,String newMessage) throws Exception {
-		SessionObject newObj = new SessionObject(newMessage,old.getExpirationTs()+cookieAge);
-		newObj.setSessionId(old.getSessionId());
-		newObj.setVersion(old.getVersion()+1);
-	    return newObj;
-	 }
 	
 
 }

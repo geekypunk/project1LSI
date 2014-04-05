@@ -1,12 +1,14 @@
 package com.cs5300.proj1a.listeners;
 
 import java.util.Timer;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 import com.cs5300.proj1a.daemons.SessionCleanUpDaemon;
+import com.cs5300.proj1a.servlets.SessionManager;
 import com.cs5300.proj1a.utils.Utils;
 
 /**
@@ -21,6 +23,7 @@ public class WebAppListener implements ServletContextListener {
      * Default constructor. 
      * 
      */
+	private final static Logger LOGGER = Logger.getLogger(WebAppListener.class.getName());
 	SessionCleanUpDaemon clsTask;
 	private static int deamonStartPeriod = 100*1000; // Time intervals in which session cleanup daemon is invoked 
     public WebAppListener() {
@@ -32,10 +35,25 @@ public class WebAppListener implements ServletContextListener {
      * @see ServletContextListener#contextInitialized(ServletContextEvent)
      */
     public void contextInitialized(ServletContextEvent arg0) {
-    	Utils.SERVER_IP = Utils.getPublicIP();
-    	Timer time = new Timer(); // Instantiate Timer Object
-    	SessionCleanUpDaemon st = new SessionCleanUpDaemon(); // Instantiate SheduledTask class
-		time.schedule(st, 0, deamonStartPeriod); // Create Repetitively task for every 1 secs
+    	
+    	try{
+	    	
+    		//Change for AWS
+	    	Utils.SERVER_IP = Utils.getIP();
+	    	//Bootstrap mechanism
+	    	
+	    	
+	    	//Garbage collection
+	    	Timer time = new Timer(); // Instantiate Timer Object
+	    	SessionCleanUpDaemon st = new SessionCleanUpDaemon(); // Instantiate SheduledTask class
+			time.schedule(st, 0, deamonStartPeriod); // Create Repetitively task for every 1 secs
+	    	
+    	}catch(Exception e){
+    		
+    		LOGGER.info("Error in Initiliazation");
+    		LOGGER.info(Utils.getStackTrace(e));
+    		
+    	}
     }
 
 	/**
