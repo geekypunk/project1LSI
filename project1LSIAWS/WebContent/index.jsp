@@ -1,80 +1,139 @@
-<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
-<%@ page import="com.amazonaws.*" %>
-<%@ page import="com.amazonaws.auth.*" %>
-<%@ page import="com.amazonaws.services.ec2.*" %>
-<%@ page import="com.amazonaws.services.ec2.model.*" %>
-<%@ page import="com.amazonaws.services.s3.*" %>
-<%@ page import="com.amazonaws.services.s3.model.*" %>
-<%@ page import="com.amazonaws.services.dynamodbv2.*" %>
-<%@ page import="com.amazonaws.services.dynamodbv2.model.*" %>
-
-<%! // Share the client objects across threads to
-    // avoid creating new clients for each web request
-    private AmazonEC2         ec2;
-    private AmazonS3           s3;
-    private AmazonDynamoDB dynamo;
- %>
-
-<%
-    /*
-     * AWS Elastic Beanstalk checks your application's health by periodically
-     * sending an HTTP HEAD request to a resource in your application. By
-     * default, this is the root or default resource in your application,
-     * but can be configured for each environment.
-     *
-     * Here, we report success as long as the app server is up, but skip
-     * generating the whole page since this is a HEAD request only. You
-     * can employ more sophisticated health checks in your application.
-     */
-    if (request.getMethod().equals("HEAD")) return;
-%>
-
-<%
-    if (ec2 == null) {
-        AWSCredentialsProvider credentialsProvider = new ClasspathPropertiesFileCredentialsProvider();
-        ec2    = new AmazonEC2Client(credentialsProvider);
-        s3     = new AmazonS3Client(credentialsProvider);
-        dynamo = new AmazonDynamoDBClient(credentialsProvider);
-    }
-%>
-
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-    <title>Hello AWS Web World!</title>
-    <link rel="stylesheet" href="styles/styles.css" type="text/css" media="screen">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
 </head>
 <body>
-    <div id="content" class="container">
-        <div class="section grid grid5 s3">
-            <h2>Amazon S3 Buckets:</h2>
-            <ul>
-            <% for (Bucket bucket : s3.listBuckets()) { %>
-               <li> <%= bucket.getName() %> </li>
-            <% } %>
-            </ul>
-        </div>
+<div>
+<br/>
+<div><b>Server Message :</b> <p id="serverMsgDisplay"></p></div>
+<b>Cookie Value :</b> <p id="serverName"></p>
+<b>Cookie Expiration time :</b> <p id="cookieExpTime"></p>
+</div>
+<br/>
+<div> <button type="button" id="replace">Replace</button> 
+<input type="text" name="message" maxlength="30" id="serverMsgInput"/> <br/>
+<button type="button" id="refresh">Refresh</button> <br/> 
+<button type="button" id="logout">Logout</button> </div>
+<script src="js/jquery-2.1.0.min.js"></script>
+<script src="js/jquery-ui-1.10.4.custom.min.js"></script>
+<script type="text/javascript">
+$(function() {
+    //This script is auto invoked when the page loads
+    $.ajax({
+		    url : "SessionManager",
+		    type: "GET",
+		    dataType : "text",
+		    data : {},
+		    success: function(data, textStatus, jqXHR)
+		    {
+		    	var responseParts = data.split("|");
+		    	$("#serverMsgDisplay").effect("highlight", {}, 1500);
+		        $('#serverMsgDisplay').text(responseParts[0]);
+		        $("#cookieExpTime").effect("highlight", {}, 1500);
+		        $('#cookieExpTime').text(responseParts[1]);
+		        $("#serverName").effect("highlight", {}, 1500);
+		        $('#serverName').text(responseParts[2]);
 
-        <div class="section grid grid5 sdb">
-            <h2>Amazon DynamoDB Tables:</h2>
-            <ul>
-            <% for (String tableName : dynamo.listTables().getTableNames()) { %>
-               <li> <%= tableName %></li>
-            <% } %>
-            </ul>
-        </div>
+		    },
+		    error: function (jqXHR, textStatus, errorThrown)
+		    {
+		 		alert(errorThrown);
+		    }
+	});
+});
+$( "#replace" ).click(function() {
+	var oldMessage = $('#serverMsgDisplay').text().trim();
+	var newMessage = $('#serverMsgInput').val().trim();
+	if(newMessage.length ===0){
+		alert("Please type a new message");
+	}
+	else if(oldMessage === newMessage){
+		alert("This message looks the same. Please enter a new one!");
+	}
+	else {
+	
+		//Limiting the new message size to 30 characters
+		if(newMessage.length>30){
+			newMessage = newMessage.substring(0,29);
+		}
+		
+		$.ajax({
+			    url : "SessionManager",
+			    type: "GET",
+			    dataType : "text",
+			    data : {
+			    	param : "replace",
+			    	message:newMessage
+			    },
+			    success: function(data, textStatus, jqXHR)
+			    {
+			       
+			    	var responseParts = data.split("|");
+		    	 	$("#serverMsgDisplay").effect("highlight", {}, 1500);
+		       	 	$('#serverMsgDisplay').text(responseParts[0]);
+		       	 	$("#cookieExpTime").effect("highlight", {}, 1500);
+		      	  	$('#cookieExpTime').text(responseParts[1]);
+		     	   	$("#serverName").effect("highlight", {}, 1500);
+		      	  	$('#serverName').text(responseParts[2]);
+			    },
+			    error: function (jqXHR, textStatus, errorThrown)
+			    {
+			 		alert(errorThrown);
+			    }
+		});
+		
+	}
+});
+$( "#refresh" ).click(function() {
+	$.ajax({
+		    url : "SessionManager",
+		    type: "GET",
+		    dataType : "text",
+		    data : {
+		    	param : "refresh"
+		    },
+		    success: function(data, textStatus, jqXHR)
+		    {
+		    	var responseParts = data.split("|");
+		    	//$("#serverMsgDisplay").effect("highlight", {}, 1500);
+		       	$('#serverMsgDisplay').text(responseParts[0]);
+		       	$("#cookieExpTime").effect("highlight", {}, 1500);
+		      	$('#cookieExpTime').text(responseParts[1]);
+		     	$("#serverName").effect("highlight", {}, 1500);
+		      	$('#serverName').text(responseParts[2]);
+		    },
+		    error: function (jqXHR, textStatus, errorThrown)
+		    {
+		 		alert(errorThrown);
+		    }
+	});
+});
 
-        <div class="section grid grid5 gridlast ec2">
-            <h2>Amazon EC2 Instances:</h2>
-            <ul>
-            <% for (Reservation reservation : ec2.describeInstances().getReservations()) { %>
-                <% for (Instance instance : reservation.getInstances()) { %>
-                   <li> <%= instance.getInstanceId() %></li>
-                <% } %>
-            <% } %>
-            </ul>
-        </div>
-    </div>
+$( "#logout" ).click(function() {
+	$.ajax({
+		    url : "SessionManager",
+		    type: "GET",
+		    dataType : "text",
+		    data : {
+		    	param : "logout"
+		    },
+		    success: function(data, textStatus, jqXHR)
+		    {
+		    	alert("You have been logged out! This page will be refreshed and you will be logged back in with a new session!");
+		    	window.location.reload();
+		    	
+		    },
+		    error: function (jqXHR, textStatus, errorThrown)
+		    {
+		 		alert(errorThrown);
+		    }
+	});
+
+});
+</script>
 </body>
 </html>
