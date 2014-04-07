@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebListener;
 import com.cs5300.proj1a.daemons.SessionCleanUpDaemon;
 import com.cs5300.proj1a.servlets.SessionManager;
 import com.cs5300.proj1a.utils.Utils;
+import com.cs5300.proj1b.rpc.RPCServer;
 
 /**
  * This class is used for setting up the session clean up daemon task.
@@ -47,6 +48,9 @@ public class WebAppListener implements ServletContextListener {
 	    	Timer time = new Timer(); // Instantiate Timer Object
 	    	SessionCleanUpDaemon st = new SessionCleanUpDaemon(); // Instantiate SheduledTask class
 			time.schedule(st, 0, deamonStartPeriod); // Create Repetitively task for every 1 secs
+			
+			//The RPC server thread
+			new Thread(new RPCServer()).start();
 	    	
     	}catch(Exception e){
     		

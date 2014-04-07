@@ -3,6 +3,7 @@ package com.cs5300.proj1a.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -39,6 +40,8 @@ public class SessionManager extends HttpServlet {
     
     //Cookie name
     public static String COOKIE_NAME="CS5300PROJ1SESSION";
+
+	public static List<String> views = new ArrayList<String>();
     
     private final static Logger LOGGER = Logger.getLogger(SessionManager.class.getName());
     
