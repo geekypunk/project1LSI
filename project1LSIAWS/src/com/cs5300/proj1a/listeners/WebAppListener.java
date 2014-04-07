@@ -3,6 +3,7 @@ package com.cs5300.proj1a.listeners;
 import java.util.Timer;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -11,6 +12,8 @@ import com.cs5300.proj1a.daemons.SessionCleanUpDaemon;
 import com.cs5300.proj1a.servlets.SessionManager;
 import com.cs5300.proj1a.utils.Utils;
 import com.cs5300.proj1b.rpc.RPCServer;
+import com.cs5300.proj1b.views.BootStrapView;
+import com.cs5300.proj1b.views.View;
 
 /**
  * This class is used for setting up the session clean up daemon task.
@@ -35,13 +38,23 @@ public class WebAppListener implements ServletContextListener {
 	/**
      * @see ServletContextListener#contextInitialized(ServletContextEvent)
      */
-    public void contextInitialized(ServletContextEvent arg0) {
+    public void contextInitialized(ServletContextEvent sce) {
     	
     	try{
 	    	
+    		ServletContext ctx = sce.getServletContext();
+    		
     		//Change for AWS
 	    	Utils.SERVER_IP = Utils.getIP();
-	    	//Bootstrap mechanism
+	    	
+	    	//Bootstrap mechanism and put bootstrap view in context
+	    	BootStrapView bootStrapView = new BootStrapView();
+	    	bootStrapView.insert(Utils.SERVER_IP);
+	    	ctx.setAttribute("bootStrapView", bootStrapView);
+	    	
+	    	//Put the view in contet
+	    	View serverView = new View();
+	    	ctx.setAttribute("serverView", serverView);
 	    	
 	    	
 	    	//Garbage collection

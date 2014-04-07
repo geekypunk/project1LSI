@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
@@ -19,6 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.cs5300.proj1a.dao.SessionObject;
 import com.cs5300.proj1a.utils.Utils;
+import com.cs5300.proj1b.views.BootStrapView;
+import com.cs5300.proj1b.views.View;
 
 /**
  * Servlet implementation class SessionManager
@@ -44,6 +47,9 @@ public class SessionManager extends HttpServlet {
 
 	public static List<String> views = new ArrayList<String>();
     
+	private static BootStrapView bootStrapView;
+    private static View serverView;
+    
     private final static Logger LOGGER = Logger.getLogger(SessionManager.class.getName());
     
     /**
@@ -61,7 +67,11 @@ public class SessionManager extends HttpServlet {
     public void init(ServletConfig config)
             throws ServletException{
     	
-    	
+    	ServletContext ctx =config.getServletContext();
+    	bootStrapView = (BootStrapView)ctx.getAttribute("bootStrapView"); 
+    	serverView = (View)ctx.getAttribute("serverView"); 
+    	LOGGER.info("bootStrapView:"+bootStrapView.getView());
+    	LOGGER.info("serverView:"+serverView.getView());
     }
     /**
 	 * @see Servlet#destroy()
