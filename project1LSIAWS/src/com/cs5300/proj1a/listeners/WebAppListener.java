@@ -49,8 +49,9 @@ public class WebAppListener implements ServletContextListener {
 	    	SessionCleanUpDaemon st = new SessionCleanUpDaemon(); // Instantiate SheduledTask class
 			time.schedule(st, 0, deamonStartPeriod); // Create Repetitively task for every 1 secs
 			
+			//TODO: Uncomment once, servlet code is ready
 			//The RPC server thread
-			new Thread(new RPCServer()).start();
+			//new Thread(new RPCServer()).start();
 	    	
     	}catch(Exception e){
     		
