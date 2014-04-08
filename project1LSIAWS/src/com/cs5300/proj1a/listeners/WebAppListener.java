@@ -1,5 +1,6 @@
 package com.cs5300.proj1a.listeners;
 
+import java.util.Random;
 import java.util.Timer;
 import java.util.logging.Logger;
 
@@ -8,6 +9,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import com.cs5300.proj1a.daemons.BootStrapViewUpdate;
 import com.cs5300.proj1a.daemons.SessionCleanUpDaemon;
 import com.cs5300.proj1a.servlets.SessionManager;
 import com.cs5300.proj1a.utils.Utils;
@@ -29,8 +31,9 @@ public class WebAppListener implements ServletContextListener {
      */
 	private final static Logger LOGGER = Logger.getLogger(WebAppListener.class.getName());
 	SessionCleanUpDaemon clsTask;
-	private static int deamonStartPeriod = 100*1000; // Time intervals in which session cleanup daemon is invoked 
-    public WebAppListener() {
+	private static int CLEANUP_INTERVAL = 100*1000; // Time intervals in which session cleanup daemon is invoked 
+	private static final int GOSSIP_SECS = 5*1000;
+	public WebAppListener() {
         // TODO Auto-generated constructor stub
     	
     }
@@ -41,26 +44,30 @@ public class WebAppListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
     	
     	try{
-	    	
+    		Random generator = new Random();
     		ServletContext ctx = sce.getServletContext();
     		
     		//Change for AWS
 	    	Utils.SERVER_IP = Utils.getIP();
 	    	
-	    	//Bootstrap mechanism and put bootstrap view in context
+	    	//Put the server view in context
+	    	View serverView = new View();
+	    	ctx.setAttribute("serverView", serverView);
+	    	
+	    	//Put Bootstrap view in context
 	    	BootStrapView bootStrapView = new BootStrapView();
 	    	bootStrapView.insert(Utils.SERVER_IP);
 	    	ctx.setAttribute("bootStrapView", bootStrapView);
 	    	
-	    	//Put the view in contet
-	    	View serverView = new View();
-	    	ctx.setAttribute("serverView", serverView);
-	    	
-	    	
 	    	//Garbage collection
 	    	Timer time = new Timer(); // Instantiate Timer Object
 	    	SessionCleanUpDaemon st = new SessionCleanUpDaemon(); // Instantiate SheduledTask class
-			time.schedule(st, 0, deamonStartPeriod); // Create Repetitively task for every 1 secs
+			time.schedule(st, (CLEANUP_INTERVAL/2) + generator.nextInt( CLEANUP_INTERVAL )); // Create Repetitively task for every 1 secs
+			
+			//Start BootStrap view update daemon
+			Timer timer2 = new Timer();
+			BootStrapViewUpdate bViewUp = new BootStrapViewUpdate(ctx);
+			timer2.schedule(bViewUp, (GOSSIP_SECS/2) + generator.nextInt( GOSSIP_SECS ));
 			
 			//TODO: Uncomment once, servlet code is ready
 			//The RPC server thread

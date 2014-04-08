@@ -1,6 +1,7 @@
 package com.cs5300.proj1b.views;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 
@@ -17,6 +18,9 @@ public class View {
 
 		this.svrIDList = svrIds;
 		
+	}
+	public View(View _view){
+		this.svrIDList = _view.getView();
 	}
 	
 	/**
@@ -49,6 +53,8 @@ public class View {
 		this.svrIDList.add(svrID);
 	}
 	
+	
+	
 	/**
 	 * Remove svrID from View if present
 	 * @param svrID
@@ -79,5 +85,25 @@ public class View {
 	 */
 	public void union(Set<String> _view){
 		this.svrIDList.addAll(_view);
+	}
+	
+	public void replaceWithView(View _view){
+		this.svrIDList.clear();
+		this.svrIDList.addAll(_view.getView());
+	}
+	@Override
+	public String toString(){
+		StringBuffer sb = new StringBuffer();
+		Iterator<String> it = this.svrIDList.iterator();
+		String s;
+		while(it.hasNext()){
+			s = it.next();
+			sb.append(s).append("_");
+		}
+		
+		if(sb.length()>0){
+			sb.deleteCharAt(sb.length()-1);
+		}
+		return sb.toString();
 	}
 }

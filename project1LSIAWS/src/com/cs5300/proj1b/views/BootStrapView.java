@@ -92,5 +92,19 @@ public class BootStrapView {
 		putAttributesRequest.setAttributes(list);
         simpleDBClient.putAttributes(putAttributesRequest);
 	}
+	
+	public void replaceView(View _view){
+		
+		String currentView = _view.toString();
+		PutAttributesRequest putAttributesRequest = new PutAttributesRequest();
+		putAttributesRequest.setDomainName(DOMAIN);
+		putAttributesRequest.setItemName(ITEM_NAME);
+		
+		List<ReplaceableAttribute> list = new ArrayList<ReplaceableAttribute>();
+		list.add(new ReplaceableAttribute(ATTR_NAME, currentView, true));
+		putAttributesRequest.setAttributes(list);
+        simpleDBClient.putAttributes(putAttributesRequest);
+		
+	}
 		
 }

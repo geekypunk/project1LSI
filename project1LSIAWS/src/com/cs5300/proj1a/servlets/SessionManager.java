@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -95,12 +96,13 @@ public class SessionManager extends HttpServlet {
 	    // get HTTP GET request param
 	    String requestType = request.getParameter("param");
 	    
-	    String sessionIdFromCookie = null;
+	    //String sessionIdFromCookie = null;
+	    Cookie responseCookie = null;
 	    Cookie[] cookies = request.getCookies();
 	    if (cookies != null) {
 	      for (int i = 0; i < cookies.length; i++) {
 	        if (cookies[i].getName().equals(COOKIE_NAME)) {
-	          sessionIdFromCookie = cookies[i].getValue();
+	        	responseCookie = cookies[i];
 	          break;
 	        }
 	      }
@@ -108,7 +110,7 @@ public class SessionManager extends HttpServlet {
 	    
 	    try{
 	    if(requestType ==null){
-		    if (sessionIdFromCookie == null) {
+		    if (responseCookie == null) {
 		   
 		    	//Create a new session object
 		    	SessionObject sessionObj = new SessionObject(defaultServerMsg,Utils.getCurrentTimeInMillis()+cookieAge);
@@ -123,78 +125,58 @@ public class SessionManager extends HttpServlet {
 		   
 		    }else{
 		    
-		    	//A GET request(i.e with no params, or landing page request) 
-		    	//should return a new session object with incremented version number.
-		    	//Hitting F5 will also invoke the below code
-		    	SessionObject sessionObj = sessionTable.get(sessionIdFromCookie);
+		    	SessionObject sessionObj = sessionTable.get(responseCookie.getValue());
 		    	sessionObj.incrementVersionNo();
 		    	sessionObj.setExpirationTs(Utils.getCurrentTimeInMillis()+cookieAge);
 		    	String sessionID = sessionObj.getSessionId();
-		    	//Create a new session object with incremented version
-		    	//SessionObject newSessionObj = generateNewSessionObjectWithIncrementedVersion(sessionObj);
-		    	//For new object
-		    	//String sessionIDWithVersion = newSessionObj.getSessionIdWithVersion();
-		    	//Put the new session object with incremented session version in the session table
-		    	//sessionTable.put(sessionIDWithVersion, newSessionObj);
 		    	
-		    	System.out.println("Creating session:"+sessionID+" with version :"+sessionObj.getVersion());
-		    	//Old cookie is overwritten, all new requests will be handled using this cookie.
-		    	Cookie c = new Cookie(COOKIE_NAME, sessionID);
-		    	//This new cookie will have default expiration timeout
-		    	c.setMaxAge(cookieAge/1000);
-		    	response.addCookie(c);
+		    	LOGGER.info("Creating session:"+sessionID+" with version :"+sessionObj.getVersion());
+		    	responseCookie.setMaxAge(cookieAge/1000);
+		    	response.addCookie(responseCookie);
 		    	responseWriter.write(sessionObj.toString());
 		    }
 	    
 	    }else if(requestType.equalsIgnoreCase("refresh")){
 
 	    	//Handle refresh button
-	    	SessionObject sessionObj = sessionTable.get(sessionIdFromCookie);
+	    	SessionObject sessionObj = sessionTable.get(responseCookie.getValue());
 	    	sessionObj.incrementVersionNo();
 	    	sessionObj.setExpirationTs(Utils.getCurrentTimeInMillis()+cookieAge);
-	    	String sessionID = sessionObj.getSessionId();
-	    	//Create a new session object with incremented version
-	    	//SessionObject newSessionObj = generateNewSessionObjectWithIncrementedVersion(sessionObj);
-	    	//For new object
-	    	//String sessionIDWithVersion = newSessionObj.getSessionIdWithVersion();
-	    	//Put the new session object with incremented session version in the session table
-	    	//sessionTable.put(sessionIDWithVersion, sessionObj);
-	    	Cookie c = new Cookie(COOKIE_NAME, sessionID);
-	    	c.setMaxAge(cookieAge/1000);
-	    	response.addCookie(c);
+	    	responseCookie.setMaxAge(cookieAge/1000);
+	    	response.addCookie(responseCookie);
 	    	responseWriter.write(sessionObj.toString());
 	    }
 	    
 	    else if( requestType.equalsIgnoreCase("replace")){
 	    	
 	    	String newMessage = request.getParameter("message");
-	    	//Handle replace button
-	    	SessionObject sessionObj = sessionTable.get(sessionIdFromCookie);
+	    	SessionObject sessionObj = sessionTable.get(responseCookie.getValue());
 	    	sessionObj.setMessage(newMessage);
 	    	sessionObj.incrementVersionNo();
 	    	sessionObj.setExpirationTs(Utils.getCurrentTimeInMillis()+cookieAge);
-	    	String sessionID = sessionObj.getSessionId();
-	    	//Create a new session object with incremented version
-	    	//SessionObject newSessionObj = generateNewSessionObjectWithIncrementedVersion(sessionObj,newMessage);
-	    	//For new object
-	    	//String sessionIDWithVersion = newSessionObj.getSessionIdWithVersion();
-	    	//Put the new session object with incremented session version in the session table
-	    	//sessionTable.put(sessionIDWithVersion, sessionObj);
-	    	Cookie c = new Cookie(COOKIE_NAME, sessionID);
-	    	c.setMaxAge(cookieAge/1000);
-	    	response.addCookie(c);
+	    	responseCookie.setMaxAge(cookieAge/1000);
+	    	response.addCookie(responseCookie);
 	    	responseWriter.write(sessionObj.toString());
-	    }else{
+	    }
+	    else if(requestType.equalsIgnoreCase("bootStrapView")){
+	    	
+	    	String responseHTML = bootStrapView.getView().toString();
+			Set<String> view = serverView.getView();
+			responseHTML+="|"+view.toString();
+			responseCookie.setMaxAge(cookieAge/1000);
+			responseWriter.write(responseHTML);
+	    }
+	    else{
 	    	
 	    	//Handle logout button
 	    	
-	    	Cookie c = new Cookie(COOKIE_NAME, sessionIdFromCookie);
+	    	
 	    	//Causes cookie to be removed from the browser
-	    	c.setMaxAge(0);
+	    	responseCookie.setMaxAge(0);
 	    	//Delete the session object from the table
-	    	sessionTable.remove(sessionIdFromCookie);
-	    	System.out.println("Logging out of session:"+sessionIdFromCookie);
-	       	response.addCookie(c);
+	    	sessionTable.remove(responseCookie.getValue());
+	    	LOGGER.info("Logging out of session:"+responseCookie);
+	       	response.addCookie(responseCookie);
 	    	
 	    }
 	    }catch(Exception e){
