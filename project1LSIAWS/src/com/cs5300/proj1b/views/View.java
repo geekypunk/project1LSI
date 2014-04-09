@@ -8,7 +8,7 @@ import java.util.Set;
 public class View {
 
 	private Set<String> svrIDList;
-	private static final int viewSize = 5;
+	public static final int viewSize = 5;
 	private Random randomGenerator;
 	public View(){
 		this.randomGenerator = new Random();

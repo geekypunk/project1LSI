@@ -46,10 +46,9 @@ public class SessionManager extends HttpServlet {
     //Cookie name
     public static String COOKIE_NAME="CS5300PROJ1SESSION";
 
-	public static List<String> views = new ArrayList<String>();
     
 	private static BootStrapView bootStrapView;
-    private static View serverView;
+    public static View serverView;
     
     private final static Logger LOGGER = Logger.getLogger(SessionManager.class.getName());
     

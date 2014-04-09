@@ -11,8 +11,10 @@ import javax.servlet.annotation.WebListener;
 
 import com.cs5300.proj1a.daemons.BootStrapViewUpdate;
 import com.cs5300.proj1a.daemons.SessionCleanUpDaemon;
+import com.cs5300.proj1a.daemons.ViewUpdate;
 import com.cs5300.proj1a.servlets.SessionManager;
 import com.cs5300.proj1a.utils.Utils;
+import com.cs5300.proj1b.rpc.RPCClient;
 import com.cs5300.proj1b.rpc.RPCServer;
 import com.cs5300.proj1b.views.BootStrapView;
 import com.cs5300.proj1b.views.View;
@@ -32,6 +34,7 @@ public class WebAppListener implements ServletContextListener {
 	private final static Logger LOGGER = Logger.getLogger(WebAppListener.class.getName());
 	SessionCleanUpDaemon clsTask;
 	private static int CLEANUP_INTERVAL = 100*1000; // Time intervals in which session cleanup daemon is invoked 
+	private static final int BOOT_SERVER_UPDATE_SECS = 5*1000;
 	private static final int GOSSIP_SECS = 5*1000;
 	public WebAppListener() {
         // TODO Auto-generated constructor stub
@@ -67,9 +70,15 @@ public class WebAppListener implements ServletContextListener {
 			//Start BootStrap view update daemon
 			Timer timer2 = new Timer();
 			BootStrapViewUpdate bViewUp = new BootStrapViewUpdate(ctx);
-			timer2.schedule(bViewUp, (GOSSIP_SECS/2) + generator.nextInt( GOSSIP_SECS ));
+			timer2.schedule(bViewUp, (BOOT_SERVER_UPDATE_SECS/2) + generator.nextInt( BOOT_SERVER_UPDATE_SECS ));
 			
-			//TODO: Uncomment once, servlet code is ready
+			//TODO: Uncomment code below, once servlet code is ready
+			//Start Gossip among servers
+//			Timer timer3 = new Timer();
+//			ViewUpdate viewUpdate = new ViewUpdate(ctx, new RPCClient());
+//			timer3.schedule(viewUpdate, (GOSSIP_SECS/2) + generator.nextInt( GOSSIP_SECS ));
+			
+			
 			//The RPC server thread
 			//new Thread(new RPCServer()).start();
 	    	

@@ -6,12 +6,14 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.cs5300.proj1a.servlets.SessionManager;
 import com.cs5300.proj1a.utils.Utils;
 import com.cs5300.proj1b.rpc.Constants.Operation;
+import com.cs5300.proj1b.views.View;
 
 /**
  * RPC client to handle requests for session read and write, and get view.
@@ -53,6 +55,11 @@ public class RPCClient {
 			// sending to multiple [destAddr, destPort] pairs
 			// using a single pre-existing DatagramSocket object rpcSocket
 			for (String ipAddress : destinationAddresses) {
+				
+				//Do not send to NULL server
+				if(Constants.NULL_ADDRESS.equals(ipAddress))
+					continue;
+				
 				LOGGER.info("Sending SESSION_READ request to server "
 						+ ipAddress);
 				DatagramPacket sendPkt = new DatagramPacket(outBuf,
@@ -79,7 +86,8 @@ public class RPCClient {
 			} while (!parts[0].equals(callId));
 
 			// Add to views on getting response
-			SessionManager.views.add(recvPkt.getAddress().getHostAddress());
+			SessionManager.serverView.insert(recvPkt.getAddress()
+					.getHostAddress());
 			LOGGER.info("Inserted " + recvPkt.getAddress().getHostAddress()
 					+ " to views");
 
@@ -87,11 +95,10 @@ public class RPCClient {
 
 			// Remove from views on time out
 			for (String ipAddress : destinationAddresses) {
-				if (SessionManager.views.contains(ipAddress)) {
-					SessionManager.views.remove(ipAddress);
-					LOGGER.warning("Timeout occurred. Removed server "
-							+ ipAddress + " from views");
-				}
+				SessionManager.serverView.remove(ipAddress);
+				LOGGER.warning("Timeout occurred. Removed server " + ipAddress
+						+ " from views");
+
 			}
 
 			recvPkt = null;
@@ -115,8 +122,10 @@ public class RPCClient {
 	 * @param version
 	 * @param data
 	 * @param discardTime
+	 * 
+	 * @return IP of the server responded
 	 */
-	public void sessionWriteClient(List<String> destinationAddresses,
+	public String sessionWriteClient(List<String> destinationAddresses,
 			String sessionID, String version, String data, long discardTime) {
 		callId++;
 		DatagramSocket rpcSocket = null;
@@ -134,93 +143,162 @@ public class RPCClient {
 			// sending to multiple [destAddr, destPort] pairs
 			// using a single pre-existing DatagramSocket object rpcSocket
 			for (String ipAddress : destinationAddresses) {
+				
+				//Do not send to NULL server
+				if(Constants.NULL_ADDRESS.equals(ipAddress))
+					continue;
+				
 				LOGGER.info("Sending SESSION_WRITE request to server "
 						+ ipAddress);
 				DatagramPacket sendPkt = new DatagramPacket(outBuf,
 						outBuf.length, InetAddress.getByName(ipAddress),
 						Constants.port);
 				rpcSocket.send(sendPkt);
+
+				// wait for response
+				String parts[] = null;
+				byte[] inBuf = new byte[10];
+				DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
+
+				String receiverIpAddress = "";
+				try {
+					// Get the first response for the corresponding callID
+					do {
+						recvPkt.setLength(inBuf.length);
+						rpcSocket.setSoTimeout(Constants.timeout);
+						rpcSocket.receive(recvPkt);
+						receiverIpAddress = recvPkt.getAddress()
+								.getHostAddress();
+						LOGGER.info("Received response from server "
+								+ receiverIpAddress);
+						data = new String(recvPkt.getData());
+						parts = data.split(Constants.delimiter);
+
+					} while (!parts[0].equals(callId));
+				} catch (InterruptedIOException ie) {
+					recvPkt = null;
+
+					// Remove from views on time out
+
+					SessionManager.serverView.remove(ipAddress);
+					LOGGER.warning("Timeout occurred. Removed server "
+							+ ipAddress + " from views");
+
+				}
+
+				if (recvPkt != null) {
+					// Add to views on getting response
+					SessionManager.serverView.insert(recvPkt.getAddress()
+							.getHostAddress());
+					LOGGER.info("Inserted "
+							+ recvPkt.getAddress().getHostAddress()
+							+ " to views");
+					return recvPkt.getAddress().getHostAddress();
+				}
+
 			}
+
 		} catch (IOException e) {
-			LOGGER.warning("An IO error occurred attempting to write session with ID " + sessionID);
+			LOGGER.warning("An IO error occurred attempting to write session with ID "
+					+ sessionID);
 			LOGGER.warning(Utils.getStackTrace(e));
 		} finally {
 			rpcSocket.close();
 		}
+
+		// return null address, if no backup is found
+		return Constants.NULL_ADDRESS;
 	}
 
 	/**
-	 * Returns view of the given server
+	 * Returns view of the given server.
+	 * Returns empty list if there is no successful response
 	 * 
 	 * @param - ipAddress - Server's ip address, for which the view is requested
 	 * @return - Requested view
 	 */
-	public List<String> getView(String ipAddress) {
+	public HashSet<String> getView() {
 		callId++;
 
-		List<String> view = new ArrayList<String>();
+		HashSet<String> view = new HashSet<String>();
 		DatagramSocket rpcSocket = null;
 		DatagramPacket recvPkt = null;
-		try {
-
-			// Unique call Id, operation ID, session ID, session version No
-			String outBufString = callId + Constants.delimiter
-					+ Operation.GET_VIEW;
-			byte[] outBuf = outBufString.getBytes();
-
-			// Send request to get view
-			LOGGER.info("Sending GET_VIEW request to server " + ipAddress);
-			rpcSocket = new DatagramSocket();
-			DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length,
-					InetAddress.getByName(ipAddress), Constants.port);
-			rpcSocket.send(sendPkt);
-
-			byte[] inBuf = new byte[Constants.maxPacketSize];
-			recvPkt = new DatagramPacket(inBuf, inBuf.length);
-
-			String parts[] = null;
-
-			// Get the first response for the corresponding callID
-			do {
-				recvPkt.setLength(inBuf.length);
-				rpcSocket.setSoTimeout(Constants.timeout);
-				rpcSocket.receive(recvPkt);
-				LOGGER.info("Received response from server "
-						+ recvPkt.getAddress().getHostAddress());
-				String data = new String(recvPkt.getData());
-				parts = data.split(Constants.delimiter);
-			} while (!parts[0].equals(callId));
-
-			// Add to this server's view
-			for (int i = 1; i < parts.length; i++) {
-				view.add(parts[i]);
+		
+		//Choose a random server
+		String ipAddress = SessionManager.serverView.choose();
+		
+		
+		int attempt = 0;
+		while (true) {
+			
+			//Do not try for more than view size
+			if(attempt == View.viewSize){
+				return view;
 			}
+			try {
+				// Unique call Id, operation ID, session ID, session version No
+				String outBufString = callId + Constants.delimiter
+						+ Operation.GET_VIEW;
+				byte[] outBuf = outBufString.getBytes();
 
-			// Add to views on getting response
-			SessionManager.views.add(recvPkt.getAddress().getHostAddress());
-			LOGGER.info("Inserted " + recvPkt.getAddress().getHostAddress()
-					+ " to views");
+				// Send request to get view
+				LOGGER.info("Sending GET_VIEW request to server " + ipAddress);
+				rpcSocket = new DatagramSocket();
+				DatagramPacket sendPkt = new DatagramPacket(outBuf,
+						outBuf.length, InetAddress.getByName(ipAddress),
+						Constants.port);
+				rpcSocket.send(sendPkt);
 
-		} catch (InterruptedIOException iioe) {
+				byte[] inBuf = new byte[Constants.maxPacketSize];
+				recvPkt = new DatagramPacket(inBuf, inBuf.length);
 
-			// Remove from views on time out
-			if (SessionManager.views.contains(ipAddress)) {
-				SessionManager.views.remove(ipAddress);
+				String parts[] = null;
+
+				// Get the first response for the corresponding callID
+				do {
+					recvPkt.setLength(inBuf.length);
+					rpcSocket.setSoTimeout(Constants.timeout);
+					rpcSocket.receive(recvPkt);
+					LOGGER.info("Received response from server "
+							+ recvPkt.getAddress().getHostAddress());
+					String data = new String(recvPkt.getData());
+					parts = data.split(Constants.delimiter);
+				} while (!parts[0].equals(callId));
+
+				// Add to this server's view
+				for (int i = 1; i < parts.length; i++) {
+					view.add(parts[i]);
+				}
+
+				// Add to views on getting response
+				SessionManager.serverView.insert(recvPkt.getAddress()
+						.getHostAddress());
+				LOGGER.info("Inserted " + recvPkt.getAddress().getHostAddress()
+						+ " to views");
+				
+				return view;
+				
+
+			} catch (InterruptedIOException iioe) {
+
+				// Remove from views on time out
+				SessionManager.serverView.remove(ipAddress);
 				LOGGER.warning("Timeout occurred. Removed server " + ipAddress
 						+ " from views");
+
+				recvPkt = null;
+				
+
+			} catch (IOException ioe) {
+				LOGGER.warning("An IO error occurred attempting to get view for server "
+						+ ipAddress);
+				LOGGER.warning(Utils.getStackTrace(ioe));
+			} finally {
+				ipAddress = SessionManager.serverView.choose();
+				attempt ++;
+				rpcSocket.close();
 			}
-
-			recvPkt = null;
-
-		} catch (IOException ioe) {
-			LOGGER.warning("An IO error occurred attempting to get view for server "
-					+ ipAddress);
-			LOGGER.warning(Utils.getStackTrace(ioe));
-		} finally {
-			rpcSocket.close();
 		}
 
-		return view;
 	}
-
 }

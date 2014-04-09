@@ -155,7 +155,7 @@ public class RPCServer implements Runnable {
 		LOGGER.info("Received GET_VIEW request");
 
 		String response = callId;
-		for (String view : SessionManager.views) {
+		for (String view : SessionManager.serverView.getView()) {
 			response += Constants.delimiter + view;
 		}
 		LOGGER.info("Retrieved view");
