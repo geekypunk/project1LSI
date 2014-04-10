@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+	pageEncoding="UTF-8"%>
+<%@ page import="com.cs5300.proj1a.servlets.*"%>
+<%@ page import="com.cs5300.proj1a.utils.*"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,54 +19,83 @@
 
 </head>
 <body>
-<div style="margin-left: 10px">
-	<br/>
-	<div><b>Server Message :</b> <br/><p id="serverMsgDisplay"></p></div>
-	<b>Cookie Value :</b> <br/> <p id="serverName"></p>
-	<b>Cookie Expiration time :</b> <br/> <p id="cookieExpTime"></p><br/>
-	<div>
-		<b>Bootstrap View :</b> <br/><p id="bootStrapView"></p><br/> 
-		<b>Server View :</b> <br/><p id="serverView"></p><br/> 
-	</div>
-	<button class="btn btn-default btn-sm" id="refreshViews">
-		<span class="glyphicon glyphicon-refresh"></span> 
-		Reload Views
-	</button><br/><br/>
-	<div class="row">
-	  	<div class="col-lg-6">
-			<div class="input-group">
-		      <span class="input-group-btn">
-		        <button class="btn btn-default btn-sm" type="button" id="replace">
-		        <span class=" glyphicon glyphicon-upload"></span> 
-		        	Replace
-		        </button>
-		      </span>
-		      <input type="text" name="message" maxlength="30" id="serverMsgInput" class="form-control">
-		    </div>
-	    </div>
-    </div>
-    <br/>
-	
-		<button class="btn btn-default btn-sm" id="refresh">
-			<span class="glyphicon glyphicon-refresh"></span> 
-			Refresh
-		</button> &nbsp;
 
-		
-		<button class="btn btn-default btn-sm" id="logout">
-			<span class="glyphicon glyphicon-log-out"></span> 
-			Logout
+	<div style="margin-left: 10px">
+		<br />
+		<div>
+			<b>Server Message :</b> <br />
+			<p id="serverMsgDisplay"></p>
+		</div>
+		<div>
+			<b>Local Server :</b> <br />
+			<p id="localServer"><%=Utils.SERVER_IP %></p>
+		</div>
+		<div>
+			<b>Primary Server :</b> <br />
+			<p id="primaryServer"></p>
+		</div>
+		<div>
+			<b>Backup Server :</b> <br />
+			<p id="backupServer"></p>
+		</div>
+		<div>
+			<b>Data found in:</b> <br />
+			<p id="foundServer"></p>
+		</div>
+		<b>Session ID</b> <br />
+		<p id="serverName"></p>
+		<div>
+			<b>Version</b> <br />
+			<p id="version"></p>
+		</div>
+		<b>Expiration time :</b> <br />
+		<p id="cookieExpTime"></p>
+		<br />
+		<div>
+			<b>Bootstrap View :</b> <br />
+			<p id="bootStrapView"></p>
+			<br /> <b>Server View :</b> <br />
+			<p id="serverView"></p>
+			<br />
+		</div>
+		<button class="btn btn-default btn-sm" id="refreshViews">
+			<span class="glyphicon glyphicon-refresh"></span> Reload Views
 		</button>
-		
+		<br />
+		<br />
+		<div class="row">
+			<div class="col-lg-6">
+				<div class="input-group">
+					<span class="input-group-btn">
+						<button class="btn btn-default btn-sm" type="button" id="replace">
+							<span class=" glyphicon glyphicon-upload"></span> Replace
+						</button>
+					</span> <input type="text" name="message" maxlength="30"
+						id="serverMsgInput" class="form-control">
+				</div>
+			</div>
+		</div>
+		<br />
 
-	
-	
-		
-</div>
+		<button class="btn btn-default btn-sm" id="refresh">
+			<span class="glyphicon glyphicon-refresh"></span> Refresh
+		</button>
+		&nbsp;
 
-<script src="js/jquery-ui-1.10.4.custom.min.js"></script>
 
-<script type="text/javascript">
+		<button class="btn btn-default btn-sm" id="logout">
+			<span class="glyphicon glyphicon-log-out"></span> Logout
+		</button>
+
+
+
+
+
+	</div>
+
+	<script src="js/jquery-ui-1.10.4.custom.min.js"></script>
+
+	<script type="text/javascript">
 $(function() {
     //This script is auto invoked when the page loads
     $.ajax({
@@ -74,13 +105,23 @@ $(function() {
 		    data : {},
 		    success: function(data, textStatus, jqXHR)
 		    {
-		    	var responseParts = data.split("|");
+		    	var response = data.split("@");
+		    	var responseParts = response[0].split("|");
 		    	$("#serverMsgDisplay").effect("highlight", {}, 1500);
 		        $('#serverMsgDisplay').text(responseParts[0]);
 		        $("#cookieExpTime").effect("highlight", {}, 1500);
 		        $('#cookieExpTime').text(responseParts[1]);
 		        $("#serverName").effect("highlight", {}, 1500);
 		        $('#serverName').text(responseParts[2]);
+		        var parts = response[1].split("\\\$");
+		        $("#version").effect("highlight", {}, 1500);
+		        $('#version').text(parts[1]);
+		        $("#primaryServer").effect("highlight", {}, 1500);
+		        $('#primaryServer').text(parts[2]);
+		        $("#backupServer").effect("highlight", {}, 1500);
+		        $('#backupServer').text(parts[3]);
+		        $("#foundServer").effect("highlight", {}, 1500);
+		        $('#foundServer').text(parts[4]);
 		        loadViews();
 
 		    },
@@ -119,13 +160,23 @@ $( "#replace" ).click(function() {
 			    success: function(data, textStatus, jqXHR)
 			    {
 			       
-			    	var responseParts = data.split("|");
-		    	 	$("#serverMsgDisplay").effect("highlight", {}, 1500);
-		       	 	$('#serverMsgDisplay').text(responseParts[0]);
-		       	 	$("#cookieExpTime").effect("highlight", {}, 1500);
-		      	  	$('#cookieExpTime').text(responseParts[1]);
-		     	   	$("#serverName").effect("highlight", {}, 1500);
-		      	  	$('#serverName').text(responseParts[2]);
+			    	var response = data.split("@");
+			    	var responseParts = response[0].split("|");
+			    	$("#serverMsgDisplay").effect("highlight", {}, 1500);
+			        $('#serverMsgDisplay').text(responseParts[0]);
+			        $("#cookieExpTime").effect("highlight", {}, 1500);
+			        $('#cookieExpTime').text(responseParts[1]);
+			        $("#serverName").effect("highlight", {}, 1500);
+			        $('#serverName').text(responseParts[2]);
+			        var parts = response[1].split("\\\$");
+			        $("#version").effect("highlight", {}, 1500);
+			        $('#version').text(parts[1]);
+			        $("#primaryServer").effect("highlight", {}, 1500);
+			        $('#primaryServer').text(parts[2]);
+			        $("#backupServer").effect("highlight", {}, 1500);
+			        $('#backupServer').text(parts[3]);
+			        $("#foundServer").effect("highlight", {}, 1500);
+			        $('#foundServer').text(parts[4]);
 			    },
 			    error: function (jqXHR, textStatus, errorThrown)
 			    {
@@ -145,13 +196,23 @@ $( "#refresh" ).click(function() {
 		    },
 		    success: function(data, textStatus, jqXHR)
 		    {
-		    	var responseParts = data.split("|");
-		    	//$("#serverMsgDisplay").effect("highlight", {}, 1500);
-		       	$('#serverMsgDisplay').text(responseParts[0]);
-		       	$("#cookieExpTime").effect("highlight", {}, 1500);
-		      	$('#cookieExpTime').text(responseParts[1]);
-		     	$("#serverName").effect("highlight", {}, 1500);
-		      	$('#serverName').text(responseParts[2]);
+		    	var response = data.split("@");
+		    	var responseParts = response[0].split("|");
+		    	$("#serverMsgDisplay").effect("highlight", {}, 1500);
+		        $('#serverMsgDisplay').text(responseParts[0]);
+		        $("#cookieExpTime").effect("highlight", {}, 1500);
+		        $('#cookieExpTime').text(responseParts[1]);
+		        $("#serverName").effect("highlight", {}, 1500);
+		        $('#serverName').text(responseParts[2]);
+		        var parts = response[1].split("\\\$");
+		        $("#version").effect("highlight", {}, 1500);
+		        $('#version').text(parts[1]);
+		        $("#primaryServer").effect("highlight", {}, 1500);
+		        $('#primaryServer').text(parts[2]);
+		        $("#backupServer").effect("highlight", {}, 1500);
+		        $('#backupServer').text(parts[3]);
+		        $("#foundServer").effect("highlight", {}, 1500);
+		        $('#foundServer').text(parts[4]);
 		    },
 		    error: function (jqXHR, textStatus, errorThrown)
 		    {
@@ -188,7 +249,7 @@ $( "#refreshViews" ).click(function() {
 function loadViews(){
 	
     $.ajax({
-	    url : "SessionManager",
+	    url : "GetViews",
 	    type: "GET",
 	    dataType : "text",
 	    data : {

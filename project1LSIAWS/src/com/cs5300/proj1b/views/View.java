@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 
+import com.cs5300.proj1b.rpc.Constants;
+
 public class View {
 
 	private Set<String> svrIDList;
@@ -15,7 +17,7 @@ public class View {
 		this.svrIDList = new HashSet<String>();
 	}
 	public View(Set<String> svrIds){
-
+		this.randomGenerator = new Random();
 		this.svrIDList = svrIds;
 		
 	}
@@ -69,6 +71,8 @@ public class View {
 	 * @return serverID
 	 */
 	public String choose(){
+		if(this.svrIDList.isEmpty())
+			return Constants.NULL_ADDRESS;
 		int index = randomGenerator.nextInt(this.svrIDList.size());
 		int i=0;
 		for(String s : this.svrIDList){
@@ -76,7 +80,7 @@ public class View {
 		        return s;
 		    i = i + 1;
 		}
-		return null;
+		return Constants.NULL_ADDRESS;
 	}
 	
 	/**

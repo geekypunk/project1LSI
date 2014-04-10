@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.cs5300.proj1a.servlets.SessionManager;
@@ -83,7 +84,7 @@ public class RPCClient {
 				String data = new String(recvPkt.getData());
 				parts = data.split(Constants.delimiter);
 
-			} while (!parts[0].equals(callId));
+			} while (!parts[0].equals(callId) && !parts[1].equals("-1"));
 
 			// Add to views on getting response
 			SessionManager.serverView.insert(recvPkt.getAddress()
@@ -110,7 +111,7 @@ public class RPCClient {
 		} finally {
 			rpcSocket.close();
 		}
-		return new String(recvPkt.getData());
+		return new String(recvPkt.getAddress().getHostAddress() + Constants.delimiter + recvPkt.getData());
 	}
 
 	/**
@@ -125,13 +126,23 @@ public class RPCClient {
 	 * 
 	 * @return IP of the server responded
 	 */
-	public String sessionWriteClient(List<String> destinationAddresses,
+	public String sessionWriteClient(Set<String> destinationAddresses,
 			String sessionID, String version, String data, long discardTime) {
 		callId++;
+		boolean FIND_BACKUP = false;
 		DatagramSocket rpcSocket = null;
 		try {
 			rpcSocket = new DatagramSocket();
+			
 
+			if(destinationAddresses.isEmpty()){
+				FIND_BACKUP = true;
+				destinationAddresses = SessionManager.serverView.getView();
+				if(destinationAddresses.isEmpty()){
+					return Constants.NULL_ADDRESS;
+				}
+			}
+			
 			// Unique call Id, operation Id, session ID, version number, data,
 			// discard time
 			String outBufString = callId + Constants.delimiter
@@ -154,7 +165,7 @@ public class RPCClient {
 						outBuf.length, InetAddress.getByName(ipAddress),
 						Constants.port);
 				rpcSocket.send(sendPkt);
-
+			
 				// wait for response
 				String parts[] = null;
 				byte[] inBuf = new byte[10];
@@ -193,11 +204,13 @@ public class RPCClient {
 					LOGGER.info("Inserted "
 							+ recvPkt.getAddress().getHostAddress()
 							+ " to views");
-					return recvPkt.getAddress().getHostAddress();
+					
+					if(FIND_BACKUP)
+						return recvPkt.getAddress().getHostAddress();
 				}
 
+			
 			}
-
 		} catch (IOException e) {
 			LOGGER.warning("An IO error occurred attempting to write session with ID "
 					+ sessionID);
@@ -226,15 +239,13 @@ public class RPCClient {
 		
 		//Choose a random server
 		String ipAddress = SessionManager.serverView.choose();
+		if(ipAddress.equals(Constants.NULL_ADDRESS))
+			return view;
 		
 		
 		int attempt = 0;
 		while (true) {
 			
-			//Do not try for more than view size
-			if(attempt == View.viewSize){
-				return view;
-			}
 			try {
 				// Unique call Id, operation ID, session ID, session version No
 				String outBufString = callId + Constants.delimiter
@@ -294,8 +305,16 @@ public class RPCClient {
 						+ ipAddress);
 				LOGGER.warning(Utils.getStackTrace(ioe));
 			} finally {
-				ipAddress = SessionManager.serverView.choose();
 				attempt ++;
+
+				//Do not try for more than view size
+				if(attempt == View.viewSize){
+					return view;
+				}
+
+				ipAddress = SessionManager.serverView.choose();
+				if(ipAddress.equals(Constants.NULL_ADDRESS))
+					return view;
 				rpcSocket.close();
 			}
 		}

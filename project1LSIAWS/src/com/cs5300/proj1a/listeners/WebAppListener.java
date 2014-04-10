@@ -1,5 +1,6 @@
 package com.cs5300.proj1a.listeners;
 
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Timer;
 import java.util.logging.Logger;
@@ -53,14 +54,17 @@ public class WebAppListener implements ServletContextListener {
     		//Change for AWS
 	    	Utils.SERVER_IP = Utils.getIP();
 	    	
-	    	//Put the server view in context
-	    	View serverView = new View();
-	    	ctx.setAttribute("serverView", serverView);
+	    
 	    	
 	    	//Put Bootstrap view in context
 	    	BootStrapView bootStrapView = new BootStrapView();
 	    	bootStrapView.insert(Utils.SERVER_IP);
 	    	ctx.setAttribute("bootStrapView", bootStrapView);
+	    	
+	    	//Put the server view in context
+	    	View serverView = new View(new HashSet<String>(bootStrapView.getView()));	    	
+	    	ctx.setAttribute("serverView", serverView);
+	    	SessionManager.serverView = serverView;
 	    	
 	    	//Garbage collection
 	    	Timer time = new Timer(); // Instantiate Timer Object
@@ -74,13 +78,13 @@ public class WebAppListener implements ServletContextListener {
 			
 			//TODO: Uncomment code below, once servlet code is ready
 			//Start Gossip among servers
-//			Timer timer3 = new Timer();
-//			ViewUpdate viewUpdate = new ViewUpdate(ctx, new RPCClient());
-//			timer3.schedule(viewUpdate, (GOSSIP_SECS/2) + generator.nextInt( GOSSIP_SECS ));
+			Timer timer3 = new Timer();
+			ViewUpdate viewUpdate = new ViewUpdate(ctx, new RPCClient());
+			timer3.schedule(viewUpdate, (GOSSIP_SECS/2) + generator.nextInt( GOSSIP_SECS ));
 			
 			
 			//The RPC server thread
-			//new Thread(new RPCServer()).start();
+			new Thread(new RPCServer()).start();
 	    	
     	}catch(Exception e){
     		

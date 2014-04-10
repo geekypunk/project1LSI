@@ -14,6 +14,7 @@ public class SessionObject {
 	private int version;
 	private long expirationTs;
 	private String message;
+	public static final long DELTA= 5 * 1000;
 	
 	public SessionObject(String message,long expTs) throws Exception{
 		
@@ -99,6 +100,6 @@ public class SessionObject {
 	
 	@Override
 	public String toString(){
-		return this.getMessage()+"|"+this.getExpirationDate()+"|"+this.getSessionId()+"_"+this.getVersion();
+		return this.getMessage()+"|"+this.getExpirationDate()+"|"+this.getSessionId();
 	}
 }

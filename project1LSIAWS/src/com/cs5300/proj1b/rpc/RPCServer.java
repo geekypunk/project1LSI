@@ -127,10 +127,11 @@ public class RPCServer implements Runnable {
 			LOGGER.info("Received SESSION_WRITE request for session ID "
 					+ sessionID);
 
+			
 			// Create a new session object, with the given data
 			SessionObject sessionObject = new SessionObject(message,
 					Long.valueOf(discardTime));
-			sessionObject.incrementVersionNo();
+//			sessionObject.incrementVersionNo();
 
 			// Replace the existing session information with the new version,
 			// this is same as garbage collecting the older versions
