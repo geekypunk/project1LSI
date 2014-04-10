@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -26,9 +24,8 @@ import com.cs5300.proj1a.dao.SessionObject;
 import com.cs5300.proj1a.utils.Utils;
 import com.cs5300.proj1b.rpc.Constants;
 import com.cs5300.proj1b.rpc.RPCClient;
-import com.cs5300.proj1b.rpc.RPCServer;
 import com.cs5300.proj1b.views.BootStrapView;
-import com.cs5300.proj1b.views.View;
+import com.cs5300.proj1b.views.ServerView;
 
 /**
  * Servlet implementation class SessionManager This class handles all requests
@@ -41,7 +38,7 @@ public class SessionManager extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	// Display message
-	public static String defaultServerMsg = "Hello User!";
+	public static String DEFAULT_MSG = "Hello User!";
 
 	// Global session table
 	public static ConcurrentHashMap<String, SessionObject> sessionTable = new ConcurrentHashMap<String, SessionObject>();
@@ -51,14 +48,13 @@ public class SessionManager extends HttpServlet {
 
 	// Cookie name
 	public static String COOKIE_NAME = "CS5300PROJ1SESSION";
-	private static String SERVER_NULL = "0.0.0.0";
 	public static List<String> views = new ArrayList<String>();
 
+	private ServletContext servletContext;
 	private static BootStrapView bootStrapView;
-	public static View serverView;
-	private Random randomGenerator;
+	//public static ServerView serverView;
+	private static ServerView serverView;
 	private static RPCClient rpcClient;
-	private static RPCServer rpcServer;
 	private final static Logger LOGGER = Logger.getLogger(SessionManager.class
 			.getName());
 	private static String new_backup;
@@ -77,10 +73,10 @@ public class SessionManager extends HttpServlet {
 	 */
 	public void init(ServletConfig config) throws ServletException {
 
-		ServletContext ctx = config.getServletContext();
-		bootStrapView = (BootStrapView) ctx.getAttribute("bootStrapView");
-		serverView = (View) ctx.getAttribute("serverView");
-		LOGGER.info("bootStrapView:" + bootStrapView.getView());
+		servletContext = config.getServletContext();
+		bootStrapView = (BootStrapView) servletContext.getAttribute("bootStrapView");
+		serverView = (ServerView) servletContext.getAttribute("serverView");
+		LOGGER.info("bootStrapView:" + bootStrapView.getAsServerView());
 		LOGGER.info("serverView:" + serverView.getView());
 	}
 
@@ -102,7 +98,7 @@ public class SessionManager extends HttpServlet {
 
 		// When the servlet is accessed by itself, HTTP GET happens
 		response.setContentType("text/html");
-		rpcClient = new RPCClient();
+		rpcClient = new RPCClient(servletContext);
 		PrintWriter responseWriter = response.getWriter();
 
 		// get HTTP GET request param
@@ -123,9 +119,9 @@ public class SessionManager extends HttpServlet {
 			if (requestType == null && sessionIdFromCookie == null) {
 
 				// Create a new session object
-				SessionObject sessionObj = new SessionObject(defaultServerMsg,
+				SessionObject sessionObj = new SessionObject(DEFAULT_MSG,
 						Utils.getCurrentTimeInMillis() + cookieAge + SessionObject.DELTA);
-				sessionObj.setMessage(defaultServerMsg);
+				sessionObj.setMessage(DEFAULT_MSG);
 				String sessionID = sessionObj.getSessionId();
 				System.out.println("Creating session:" + sessionID);
 				String tuple = sessionID + Constants.delimiter

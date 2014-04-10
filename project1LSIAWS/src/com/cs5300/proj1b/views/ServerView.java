@@ -7,21 +7,26 @@ import java.util.Set;
 
 import com.cs5300.proj1b.rpc.Constants;
 
-public class View {
+/**
+ * @author kt466
+ * Class for manipulating the local server view
+ *
+ */
+public class ServerView {
 
 	private Set<String> svrIDList;
 	public static final int viewSize = 5;
 	private Random randomGenerator;
-	public View(){
+	public ServerView(){
 		this.randomGenerator = new Random();
 		this.svrIDList = new HashSet<String>();
 	}
-	public View(Set<String> svrIds){
+	public ServerView(Set<String> svrIds){
 		this.randomGenerator = new Random();
 		this.svrIDList = svrIds;
 		
 	}
-	public View(View _view){
+	public ServerView(ServerView _view){
 		this.svrIDList = _view.getView();
 	}
 	
@@ -91,7 +96,11 @@ public class View {
 		this.svrIDList.addAll(_view);
 	}
 	
-	public void replaceWithView(View _view){
+	/**
+	 * Replace view with _view 
+	 * @param _view
+	 */
+	public void replaceWithView(ServerView _view){
 		this.svrIDList.clear();
 		this.svrIDList.addAll(_view.getView());
 	}
@@ -107,6 +116,9 @@ public class View {
 		
 		if(sb.length()>0){
 			sb.deleteCharAt(sb.length()-1);
+		}
+		if(sb.length()>0 && sb.charAt(0)=='_'){
+			sb.deleteCharAt(0);
 		}
 		return sb.toString();
 	}

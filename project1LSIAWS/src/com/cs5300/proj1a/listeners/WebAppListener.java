@@ -1,6 +1,5 @@
 package com.cs5300.proj1a.listeners;
 
-import java.util.HashSet;
 import java.util.Random;
 import java.util.Timer;
 import java.util.logging.Logger;
@@ -13,30 +12,28 @@ import javax.servlet.annotation.WebListener;
 import com.cs5300.proj1a.daemons.BootStrapViewUpdate;
 import com.cs5300.proj1a.daemons.SessionCleanUpDaemon;
 import com.cs5300.proj1a.daemons.ViewUpdate;
-import com.cs5300.proj1a.servlets.SessionManager;
 import com.cs5300.proj1a.utils.Utils;
 import com.cs5300.proj1b.rpc.RPCClient;
 import com.cs5300.proj1b.rpc.RPCServer;
 import com.cs5300.proj1b.views.BootStrapView;
-import com.cs5300.proj1b.views.View;
+import com.cs5300.proj1b.views.ServerView;
 
 /**
- * This class is used for setting up the session clean up daemon task.
- * The class which implements the daemon is SessionCleanUpDaemon
+ * This class is used for setting up the daemon tasks, like view updates,garbage collection etc.
  *
  */
 @WebListener
 public class WebAppListener implements ServletContextListener {
 
-    /**
-     * Default constructor. 
-     * 
-     */
+   
 	private final static Logger LOGGER = Logger.getLogger(WebAppListener.class.getName());
-	SessionCleanUpDaemon clsTask;
 	private static int CLEANUP_INTERVAL = 100*1000; // Time intervals in which session cleanup daemon is invoked 
 	private static final int BOOT_SERVER_UPDATE_SECS = 5*1000;
 	private static final int GOSSIP_SECS = 5*1000;
+	 /**
+     * Default constructor. 
+     * 
+     */
 	public WebAppListener() {
         // TODO Auto-generated constructor stub
     	
@@ -52,19 +49,20 @@ public class WebAppListener implements ServletContextListener {
     		ServletContext ctx = sce.getServletContext();
     		
     		//Change for AWS
-	    	Utils.SERVER_IP = Utils.getIP();
-	    	
-	    
+	    	Utils.SERVER_IP = Utils.getPublicIP();
 	    	
 	    	//Put Bootstrap view in context
 	    	BootStrapView bootStrapView = new BootStrapView();
-	    	bootStrapView.insert(Utils.SERVER_IP);
+	    	//bootStrapView.insert(Utils.SERVER_IP);
 	    	ctx.setAttribute("bootStrapView", bootStrapView);
 	    	
 	    	//Put the server view in context
-	    	View serverView = new View(new HashSet<String>(bootStrapView.getView()));	    	
+	    	//ServerView serverView = bootStrapView.getAsServerView();	
+	    	ServerView serverView = new ServerView();
 	    	ctx.setAttribute("serverView", serverView);
-	    	SessionManager.serverView = serverView;
+	    	
+	    	//Deepthi, why are you doing this? As I have already put the object in the servlet context
+	    	//SessionManager.serverView = serverView;
 	    	
 	    	//Garbage collection
 	    	Timer time = new Timer(); // Instantiate Timer Object
@@ -79,12 +77,12 @@ public class WebAppListener implements ServletContextListener {
 			//TODO: Uncomment code below, once servlet code is ready
 			//Start Gossip among servers
 			Timer timer3 = new Timer();
-			ViewUpdate viewUpdate = new ViewUpdate(ctx, new RPCClient());
+			ViewUpdate viewUpdate = new ViewUpdate(ctx, new RPCClient(ctx));
 			timer3.schedule(viewUpdate, (GOSSIP_SECS/2) + generator.nextInt( GOSSIP_SECS ));
 			
 			
 			//The RPC server thread
-			new Thread(new RPCServer()).start();
+			new Thread(new RPCServer(ctx)).start();
 	    	
     	}catch(Exception e){
     		
@@ -98,7 +96,7 @@ public class WebAppListener implements ServletContextListener {
      * @see ServletContextListener#contextDestroyed(ServletContextEvent)
      */
     public void contextDestroyed(ServletContextEvent arg0) {
-    	clsTask = null;
+    	
     }
 	
 }

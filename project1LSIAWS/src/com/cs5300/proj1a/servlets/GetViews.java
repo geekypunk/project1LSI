@@ -16,16 +16,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.cs5300.proj1b.views.BootStrapView;
-import com.cs5300.proj1b.views.View;
+import com.cs5300.proj1b.views.ServerView;
 
 /**
+ * Servlet reponsible for fetching the server and Bootstrap view
  * Servlet implementation class GetViews
  */
 @WebServlet("/GetViews")
 public class GetViews extends HttpServlet {
 	private static final long serialVersionUID = 2L;
 	private static BootStrapView bootStrapView;
-    private static View serverView;
+    private static ServerView serverView;
     
     //Sets the expiration age for a cookie in milliseconds
     public static int cookieAge = 1000*60*5; 
@@ -50,8 +51,8 @@ public class GetViews extends HttpServlet {
     	
     	ServletContext ctx =config.getServletContext();
     	bootStrapView = (BootStrapView)ctx.getAttribute("bootStrapView"); 
-    	serverView = (View)ctx.getAttribute("serverView"); 
-    	LOGGER.info("bootStrapView:"+bootStrapView.getView());
+    	serverView = (ServerView)ctx.getAttribute("serverView"); 
+    	LOGGER.info("bootStrapView:"+bootStrapView.getAsServerView());
     	LOGGER.info("serverView:"+serverView.getView());
     }
     
@@ -72,15 +73,15 @@ public class GetViews extends HttpServlet {
 	      }
 	    }
 	    if(responseCookie!=null){
-			responseHTML+=bootStrapView.getView().toString();
+			responseHTML+=bootStrapView.getAsServerView().toString();
 			Set<String> view = serverView.getView();
 			responseHTML+="|"+view.toString();
 			responseCookie.setMaxAge(cookieAge/1000);
+			response.addCookie(responseCookie);
 	    }else{
 	    	responseHTML = "NoCookie";
 	    }
 		response.setContentType("text/html");
-		response.addCookie(responseCookie);
 		PrintWriter responseWriter = response.getWriter();
 		responseWriter.write(responseHTML);
 		

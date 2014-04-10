@@ -24,6 +24,7 @@ import com.amazonaws.services.simpledb.model.ReplaceableAttribute;
 
 /**
  * @author kt466
+ * Class for manipulating the BootStrap View stored in Amazon SimpleDB
  *
  */
 public class BootStrapView {
@@ -45,12 +46,15 @@ public class BootStrapView {
 		simpleDBClient.setRegion(usWest2);
 	}
 	
-	public List<String> getView(){
+	public ServerView getAsServerView(){
 		
 		GetAttributesRequest getAttributesRequest = new GetAttributesRequest(DOMAIN,ITEM_NAME);
 		GetAttributesResult result = simpleDBClient.getAttributes(getAttributesRequest);
 		String[]ips = result.getAttributes().get(0).getValue().split("_");
-		return Arrays.asList(ips);
+		Set<String> bootStrapViewIDs = new HashSet<String>();
+		bootStrapViewIDs.addAll(Arrays.asList(ips));
+		ServerView _bootStrapView = new ServerView(bootStrapViewIDs);
+		return _bootStrapView; 
 	}
 	
 	public void insert(String svrID){
@@ -93,7 +97,7 @@ public class BootStrapView {
         simpleDBClient.putAttributes(putAttributesRequest);
 	}
 	
-	public void replaceView(View _view){
+	public void replaceView(ServerView _view){
 		
 		String currentView = _view.toString();
 		PutAttributesRequest putAttributesRequest = new PutAttributesRequest();

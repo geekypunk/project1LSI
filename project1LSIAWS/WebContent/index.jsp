@@ -7,6 +7,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>CS5300 Project1</title>
+<link rel="stylesheet" href="css/main.css">
 <!-- Bootstrap-->
 <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
 
@@ -19,8 +20,10 @@
 
 </head>
 <body>
-
-	<div style="margin-left: 10px">
+	<div id="loading"></div>
+	<div id='screen'></div>
+	
+	<div id="main" style="margin-left: 10px">
 		<br />
 		<div>
 			<b>Server Message :</b> <br />
@@ -48,9 +51,8 @@
 			<b>Version</b> <br />
 			<p id="version"></p>
 		</div>
-		<b>Expiration time :</b> <br />
+		<b>Expiration time :</b>
 		<p id="cookieExpTime"></p>
-		<br />
 		<div>
 			<b>Bootstrap View :</b> <br />
 			<p id="bootStrapView"></p>
@@ -61,10 +63,8 @@
 		<button class="btn btn-default btn-sm" id="refreshViews">
 			<span class="glyphicon glyphicon-refresh"></span> Reload Views
 		</button>
-		<br />
-		<br />
-		<div class="row">
-			<div class="col-lg-6">
+				
+			<div class="col-lg-4">
 				<div class="input-group">
 					<span class="input-group-btn">
 						<button class="btn btn-default btn-sm" type="button" id="replace">
@@ -74,8 +74,8 @@
 						id="serverMsgInput" class="form-control">
 				</div>
 			</div>
-		</div>
-		<br />
+		
+	
 
 		<button class="btn btn-default btn-sm" id="refresh">
 			<span class="glyphicon glyphicon-refresh"></span> Refresh
@@ -98,6 +98,12 @@
 	<script type="text/javascript">
 $(function() {
     //This script is auto invoked when the page loads
+   // $('#screen').css({ opacity: 0.7, 'width':$(document).width(),'height':$(document).height()});
+    
+    $('#loading').html(
+    		'<img src="images/loading.GIF"> Loading!!...'
+    );
+   
     $.ajax({
 		    url : "SessionManager",
 		    type: "GET",
@@ -105,6 +111,7 @@ $(function() {
 		    data : {},
 		    success: function(data, textStatus, jqXHR)
 		    {
+		    	$('#loading').css('display', 'none');
 		    	var response = data.split("@");
 		    	var responseParts = response[0].split("|");
 		    	$("#serverMsgDisplay").effect("highlight", {}, 1500);

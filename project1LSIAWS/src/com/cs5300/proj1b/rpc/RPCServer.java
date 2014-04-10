@@ -5,8 +5,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletContext;
+
 import com.cs5300.proj1a.dao.SessionObject;
 import com.cs5300.proj1a.servlets.SessionManager;
+import com.cs5300.proj1b.views.ServerView;
 
 /**
  * RPC server thread to handle session read and write, get view requests
@@ -15,6 +18,11 @@ import com.cs5300.proj1a.servlets.SessionManager;
  * 
  */
 public class RPCServer implements Runnable {
+	
+	private static ServerView serverView;
+	public RPCServer(ServletContext ctx){
+		serverView = (ServerView) ctx.getAttribute("serverView");
+	}
 	private final static Logger LOGGER = Logger.getLogger(RPCServer.class
 			.getName());
 
@@ -93,7 +101,6 @@ public class RPCServer implements Runnable {
 		// sesion id, new version, local, primary, backup
 		String callId = parts[0];
 		String sessionID = parts[2];
-		String versionNo = parts[3];
 		LOGGER.info("Received SESSION_READ request for session ID " + sessionID);
 		String response = "";
 
@@ -156,7 +163,7 @@ public class RPCServer implements Runnable {
 		LOGGER.info("Received GET_VIEW request");
 
 		String response = callId;
-		for (String view : SessionManager.serverView.getView()) {
+		for (String view : serverView.getView()) {
 			response += Constants.delimiter + view;
 		}
 		LOGGER.info("Retrieved view");

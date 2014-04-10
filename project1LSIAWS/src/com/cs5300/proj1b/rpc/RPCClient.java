@@ -5,16 +5,16 @@ import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.cs5300.proj1a.servlets.SessionManager;
+import javax.servlet.ServletContext;
+
 import com.cs5300.proj1a.utils.Utils;
 import com.cs5300.proj1b.rpc.Constants.Operation;
-import com.cs5300.proj1b.views.View;
+import com.cs5300.proj1b.views.ServerView;
 
 /**
  * RPC client to handle requests for session read and write, and get view.
@@ -23,6 +23,10 @@ import com.cs5300.proj1b.views.View;
  * 
  */
 public class RPCClient {
+	private static ServerView serverView;
+	public RPCClient(ServletContext ctx){
+		serverView =  (ServerView) ctx.getAttribute("serverView");
+	}
 	static int callId = -1;
 	private final static Logger LOGGER = Logger.getLogger(RPCClient.class
 			.getName());
@@ -87,7 +91,7 @@ public class RPCClient {
 			} while (!parts[0].equals(callId) && !parts[1].equals("-1"));
 
 			// Add to views on getting response
-			SessionManager.serverView.insert(recvPkt.getAddress()
+			serverView.insert(recvPkt.getAddress()
 					.getHostAddress());
 			LOGGER.info("Inserted " + recvPkt.getAddress().getHostAddress()
 					+ " to views");
@@ -96,7 +100,7 @@ public class RPCClient {
 
 			// Remove from views on time out
 			for (String ipAddress : destinationAddresses) {
-				SessionManager.serverView.remove(ipAddress);
+				serverView.remove(ipAddress);
 				LOGGER.warning("Timeout occurred. Removed server " + ipAddress
 						+ " from views");
 
@@ -137,7 +141,7 @@ public class RPCClient {
 
 			if(destinationAddresses.isEmpty()){
 				FIND_BACKUP = true;
-				destinationAddresses = SessionManager.serverView.getView();
+				destinationAddresses = serverView.getView();
 				if(destinationAddresses.isEmpty()){
 					return Constants.NULL_ADDRESS;
 				}
@@ -191,7 +195,7 @@ public class RPCClient {
 
 					// Remove from views on time out
 
-					SessionManager.serverView.remove(ipAddress);
+					serverView.remove(ipAddress);
 					LOGGER.warning("Timeout occurred. Removed server "
 							+ ipAddress + " from views");
 
@@ -199,7 +203,7 @@ public class RPCClient {
 
 				if (recvPkt != null) {
 					// Add to views on getting response
-					SessionManager.serverView.insert(recvPkt.getAddress()
+					serverView.insert(recvPkt.getAddress()
 							.getHostAddress());
 					LOGGER.info("Inserted "
 							+ recvPkt.getAddress().getHostAddress()
@@ -238,7 +242,7 @@ public class RPCClient {
 		DatagramPacket recvPkt = null;
 		
 		//Choose a random server
-		String ipAddress = SessionManager.serverView.choose();
+		String ipAddress = serverView.choose();
 		if(ipAddress.equals(Constants.NULL_ADDRESS))
 			return view;
 		
@@ -282,7 +286,7 @@ public class RPCClient {
 				}
 
 				// Add to views on getting response
-				SessionManager.serverView.insert(recvPkt.getAddress()
+				serverView.insert(recvPkt.getAddress()
 						.getHostAddress());
 				LOGGER.info("Inserted " + recvPkt.getAddress().getHostAddress()
 						+ " to views");
@@ -293,7 +297,7 @@ public class RPCClient {
 			} catch (InterruptedIOException iioe) {
 
 				// Remove from views on time out
-				SessionManager.serverView.remove(ipAddress);
+				serverView.remove(ipAddress);
 				LOGGER.warning("Timeout occurred. Removed server " + ipAddress
 						+ " from views");
 
@@ -308,11 +312,11 @@ public class RPCClient {
 				attempt ++;
 
 				//Do not try for more than view size
-				if(attempt == View.viewSize){
+				if(attempt == ServerView.viewSize){
 					return view;
 				}
 
-				ipAddress = SessionManager.serverView.choose();
+				ipAddress = serverView.choose();
 				if(ipAddress.equals(Constants.NULL_ADDRESS))
 					return view;
 				rpcSocket.close();
