@@ -67,18 +67,18 @@ public class WebAppListener implements ServletContextListener {
 	    	//Garbage collection
 	    	Timer time = new Timer(); // Instantiate Timer Object
 	    	SessionCleanUpDaemon st = new SessionCleanUpDaemon(); // Instantiate SheduledTask class
-			time.schedule(st, (CLEANUP_INTERVAL/2) + generator.nextInt( CLEANUP_INTERVAL )); // Create Repetitively task for every 1 secs
+			time.schedule(st, 0, (CLEANUP_INTERVAL/2) + generator.nextInt( CLEANUP_INTERVAL )); // Create Repetitively task for every 1 secs
 			
 			//Start BootStrap view update daemon
 			Timer timer2 = new Timer();
 			BootStrapViewUpdate bViewUp = new BootStrapViewUpdate(ctx);
-			timer2.schedule(bViewUp, (BOOT_SERVER_UPDATE_SECS/2) + generator.nextInt( BOOT_SERVER_UPDATE_SECS ));
+			timer2.schedule(bViewUp, 0, (BOOT_SERVER_UPDATE_SECS/2) + generator.nextInt( BOOT_SERVER_UPDATE_SECS ));
 			
 			//TODO: Uncomment code below, once servlet code is ready
 			//Start Gossip among servers
 			Timer timer3 = new Timer();
 			ViewUpdate viewUpdate = new ViewUpdate(ctx, new RPCClient(ctx));
-			timer3.schedule(viewUpdate, (GOSSIP_SECS/2) + generator.nextInt( GOSSIP_SECS ));
+			timer3.schedule(viewUpdate, 0, (GOSSIP_SECS/2) + generator.nextInt( GOSSIP_SECS ));
 			
 			
 			//The RPC server thread

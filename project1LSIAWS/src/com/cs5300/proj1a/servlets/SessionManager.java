@@ -161,10 +161,10 @@ public class SessionManager extends HttpServlet {
 				String sessionID = parts[0];
 				String version = parts[1];
 				String primaryServer = parts[2];
-				String backupServer = parts[3];
-				String cookieValue = sessionID + Constants.delimiter
-						+ (Integer.parseInt(version) + 1) + Constants.delimiter
-						+ primaryServer + Constants.delimiter + backupServer;
+				String backupServer = parts[3];				
+			
+				
+	
 				String result = "";
 
 				if (requestType != null && requestType.equals("Logout")) {
@@ -201,6 +201,16 @@ public class SessionManager extends HttpServlet {
 								message, -1);
 						sessionObj.setVersion(Integer.valueOf(foundVersion));
 					}
+					
+					if(backupServer.equals(Constants.NULL_ADDRESS)){
+						backupServer = rpcClient.sessionWriteClient(
+								new HashSet<String>(), sessionID,
+								String.valueOf(sessionObj.getVersion()),
+								sessionObj.getMessage(), sessionObj.getExpirationTs());
+					}
+					String cookieValue = sessionID + Constants.delimiter
+							+ (Integer.parseInt(version) + 1) + Constants.delimiter
+							+ primaryServer + Constants.delimiter + backupServer;
 
 					if (requestType != null && requestType.equalsIgnoreCase("replace")) {
 						sessionObj.setMessage(request.getParameter("message"));
