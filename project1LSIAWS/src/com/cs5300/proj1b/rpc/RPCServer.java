@@ -59,7 +59,7 @@ public class RPCServer implements Runnable {
 
 				case SESSION_WRITE:
 					// SessionWrite accepts call args, and updates session
-					sessionWrite(parts);
+					outBuf = sessionWrite(parts);
 					break;
 
 				case GET_VIEW:
@@ -125,7 +125,7 @@ public class RPCServer implements Runnable {
 	 *            - string array containing session ID, version, data and time
 	 *            stamp
 	 */
-	void sessionWrite(String[] parts) {
+	byte[] sessionWrite(String[] parts) {
 		try {
 			// sesion id, new version, local, primary, backup
 			String sessionID = parts[2];
@@ -144,8 +144,12 @@ public class RPCServer implements Runnable {
 			// this is same as garbage collecting the older versions
 			SessionManager.sessionTable.put(sessionID, sessionObject);
 			LOGGER.info("Session updated for ID " + sessionID);
+			
 		} catch (Exception e) {
+			
 		}
+		return parts[0].getBytes();
+		
 	}
 
 	/**

@@ -141,7 +141,7 @@ public class RPCClient {
 
 			if(destinationAddresses.isEmpty()){
 				FIND_BACKUP = true;
-				destinationAddresses = serverView.getView();
+				destinationAddresses = new HashSet<String>(serverView.getView());
 				if(destinationAddresses.isEmpty()){
 					return Constants.NULL_ADDRESS;
 				}
@@ -192,12 +192,13 @@ public class RPCClient {
 					} while (!parts[0].equals(callId));
 				} catch (InterruptedIOException ie) {
 					recvPkt = null;
-
+					
 					// Remove from views on time out
 
 					serverView.remove(ipAddress);
 					LOGGER.warning("Timeout occurred. Removed server "
 							+ ipAddress + " from views");
+					return Constants.NULL_ADDRESS;
 
 				}
 
