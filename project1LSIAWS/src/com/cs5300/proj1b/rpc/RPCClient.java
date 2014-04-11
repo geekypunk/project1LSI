@@ -5,6 +5,7 @@ import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -96,12 +97,25 @@ public class RPCClient {
 			LOGGER.info("Inserted " + recvPkt.getAddress().getHostAddress()
 					+ " to views");
 
-		} catch (InterruptedIOException iioe) {
+		} 
+		catch(SocketTimeoutException ste){
+			
+			for (String ipAddress : destinationAddresses) {
+				serverView.remove(ipAddress);
+				LOGGER.warning("Timeout occurred. Removed server " + ipAddress
+						+ " from views");
+
+			}
+
+			recvPkt = null;
+
+		}
+		catch (InterruptedIOException iioe) {
 
 			// Remove from views on time out
 			for (String ipAddress : destinationAddresses) {
 				serverView.remove(ipAddress);
-				LOGGER.warning("Timeout occurred. Removed server " + ipAddress
+				LOGGER.warning("InterruptedIOException occurred. Removed server " + ipAddress
 						+ " from views");
 
 			}
