@@ -28,7 +28,7 @@ public class WebAppListener implements ServletContextListener {
    
 	private final static Logger LOGGER = Logger.getLogger(WebAppListener.class.getName());
 	private static int CLEANUP_INTERVAL = 100*1000; // Time intervals in which session cleanup daemon is invoked 
-	private static final int BOOT_SERVER_UPDATE_SECS = 5*1000;
+	private static final int BOOT_SERVER_UPDATE_SECS = 15*1000;
 	private static final int GOSSIP_SECS = 5*1000;
 	 /**
      * Default constructor. 

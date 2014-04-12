@@ -42,7 +42,7 @@ public class RPCServer implements Runnable {
 				rpcSocket.receive(recvPkt);
 				InetAddress returnAddr = recvPkt.getAddress();
 				int returnPort = recvPkt.getPort();
-				String data = new String(inBuf) + '\"';
+				String data = new String(inBuf);// + '\"';
 				String parts[] = data.split(Constants.delimiter);
 				//parts[parts.length - 1] = parts[parts.length - 1] + '"';
 				// here inBuf contains the callID and operationCode
@@ -114,6 +114,7 @@ public class RPCServer implements Runnable {
 		} else {
 			response = callId + Constants.delimiter + -1;
 		}
+		response+=Constants.delimiter;
 		LOGGER.info("Retrieved session for ID " + sessionID);
 		return response.getBytes();
 	}
@@ -126,6 +127,7 @@ public class RPCServer implements Runnable {
 	 *            stamp
 	 */
 	byte[] sessionWrite(String[] parts) {
+		String response="";
 		try {
 			// sesion id, new version, local, primary, backup
 			String sessionID = parts[2];
@@ -144,11 +146,11 @@ public class RPCServer implements Runnable {
 			// this is same as garbage collecting the older versions
 			SessionManager.sessionTable.put(sessionID, sessionObject);
 			LOGGER.info("Session updated for ID " + sessionID);
-			
+			response+=parts[0]+Constants.delimiter;
 		} catch (Exception e) {
 			
 		}
-		return parts[0].getBytes();
+		return response.getBytes();
 		
 	}
 
@@ -170,6 +172,7 @@ public class RPCServer implements Runnable {
 		for (String view : serverView.getView()) {
 			response += Constants.delimiter + view;
 		}
+		response+=Constants.delimiter;
 		LOGGER.info("Retrieved view");
 		return response.getBytes();
 	}
