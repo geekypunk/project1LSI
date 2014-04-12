@@ -167,7 +167,7 @@ public class SessionManager extends HttpServlet {
 	
 				String result = "";
 
-				if (requestType != null && requestType.equals("Logout")) {
+				if (requestType != null && requestType.equals("logout")) {
 
 					// Handle logout button
 					Cookie c = new Cookie(COOKIE_NAME, sessionIdFromCookie);
@@ -188,6 +188,12 @@ public class SessionManager extends HttpServlet {
 							|| Utils.SERVER_IP.equals(backupServer)) {
 						sessionObj = sessionTable.get(sessionID);
 
+						if(sessionObj == null){
+							// Create a new session object
+							sessionObj = new SessionObject(DEFAULT_MSG,
+									Utils.getCurrentTimeInMillis() + cookieAge + SessionObject.DELTA);
+							sessionObj.setMessage(DEFAULT_MSG);
+						}
 					} else {
 
 						String sessionData = rpcClient.sessionReadClient(

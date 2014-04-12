@@ -129,7 +129,7 @@ $(function() {
 		        $('#backupServer').text(parts[3]);
 		        $("#foundServer").effect("highlight", {}, 1500);
 		        $('#foundServer').text(parts[4]);
-		       // loadViews();
+		        loadViews();
 
 		    },
 		    error: function (jqXHR, textStatus, errorThrown)
