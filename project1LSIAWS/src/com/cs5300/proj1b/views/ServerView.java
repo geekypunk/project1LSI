@@ -112,7 +112,8 @@ public class ServerView {
 		String s;
 		while(it.hasNext()){
 			s = it.next();
-			sb.append(s).append("_");
+			if(s.trim().length()>0)
+				sb.append(s).append("_");
 		}
 		
 		if(sb.length()>0){

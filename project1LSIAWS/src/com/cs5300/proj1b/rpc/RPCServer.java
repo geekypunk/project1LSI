@@ -35,12 +35,15 @@ public class RPCServer implements Runnable {
 		DatagramPacket recvPkt = null;
 		try {
 			rpcSocket = new DatagramSocket(Constants.port);
+			LOGGER.info("Listening on "+ rpcSocket.getInetAddress().getHostAddress());
 			while (true) {
 				// Read the packet
 				byte[] inBuf = new byte[Constants.maxPacketSize];
 				recvPkt = new DatagramPacket(inBuf, inBuf.length);
 				rpcSocket.receive(recvPkt);
+				LOGGER.info("Connected to "+rpcSocket.getRemoteSocketAddress());
 				InetAddress returnAddr = recvPkt.getAddress();
+				LOGGER.info("Received packet from "+returnAddr);
 				int returnPort = recvPkt.getPort();
 				String data = new String(inBuf);// + '\"';
 				String parts[] = data.split(Constants.delimiter);
@@ -77,7 +80,7 @@ public class RPCServer implements Runnable {
 							outBuf.length, returnAddr, returnPort);
 					rpcSocket.send(sendPkt);
 
-					LOGGER.info("Response sent");
+					LOGGER.info("Response sent to "+returnAddr);
 				}
 			}
 		} catch (Exception e) {
@@ -170,9 +173,10 @@ public class RPCServer implements Runnable {
 
 		String response = callId;
 		for (String view : serverView.getView()) {
-			response += Constants.delimiter + view;
+			response += view+Constants.delimiter;
 		}
-		response+=Constants.delimiter;
+		if(response.equalsIgnoreCase(callId))
+			response +=Constants.delimiter;
 		LOGGER.info("Retrieved view");
 		return response.getBytes();
 	}

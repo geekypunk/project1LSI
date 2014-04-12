@@ -7,6 +7,7 @@ public class AWSSimpleDB {
 	
 	public static void main(String args[]){
 		BootStrapView view  = new BootStrapView();
+		System.out.println(view.getAsServerView());
 		view.clearView();
 		
 		//view.insert("0.0.0.0");
