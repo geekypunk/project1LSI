@@ -218,7 +218,7 @@ public class SessionManager extends HttpServlet {
 					}
 					String cookieValue = sessionID + Constants.delimiter
 							+ (Integer.parseInt(version) + 1) + Constants.delimiter
-							+ primaryServer + Constants.delimiter + backupServer + Constants.delimiter;
+							+ primaryServer + Constants.delimiter + backupServer;
 
 					if (requestType != null && requestType.equalsIgnoreCase("replace")) {
 						sessionObj.setMessage(request.getParameter("message"));
@@ -248,7 +248,7 @@ public class SessionManager extends HttpServlet {
 							+ " with version " + (Integer.valueOf(version) + 1));
 					// Old cookie is overwritten, all new requests will be
 					// handled using this cookie.
-					Cookie c = new Cookie(COOKIE_NAME, cookieValue + Constants.delimiter + addressFound);
+					Cookie c = new Cookie(COOKIE_NAME, cookieValue + Constants.delimiter + addressFound + Constants.delimiter);
 					// This new cookie will have default expiration timeout
 					c.setMaxAge(cookieAge / 1000);
 					response.addCookie(c);
