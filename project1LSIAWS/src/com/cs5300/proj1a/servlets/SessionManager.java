@@ -134,7 +134,7 @@ public class SessionManager extends HttpServlet {
 				String localServer = parts[1];
 				String backupServer = "";
 
-				for(int i=0; i < k; i++){
+				
 					new_backup = rpcClient.sessionWriteClient(
 							new HashSet<String>(), sessionID,
 							String.valueOf(sessionObj.getVersion()),
@@ -143,7 +143,7 @@ public class SessionManager extends HttpServlet {
 						backupServer = t + Constants.delimiter;
 					}
 					
-				}
+				
 
 				String location_metadata = localServer + Constants.delimiter
 						+ backupServer;
