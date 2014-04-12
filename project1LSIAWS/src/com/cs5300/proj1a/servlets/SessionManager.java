@@ -141,7 +141,7 @@ public class SessionManager extends HttpServlet {
 				List<String> destinationAddresses = new LinkedList<String>();
 				destinationAddresses.add(localServer);
 
-				String cookieValue = tuple + location_metadata + Constants.delimiter + localServer;
+				String cookieValue = tuple + location_metadata + Constants.delimiter + localServer + Constants.delimiter;
 				Cookie c = new Cookie(COOKIE_NAME, cookieValue);
 				c.setMaxAge(cookieAge / 1000);
 				sessionTable.put(sessionID, sessionObj);
@@ -212,7 +212,7 @@ public class SessionManager extends HttpServlet {
 					}
 					String cookieValue = sessionID + Constants.delimiter
 							+ (Integer.parseInt(version) + 1) + Constants.delimiter
-							+ primaryServer + Constants.delimiter + backupServer;
+							+ primaryServer + Constants.delimiter + backupServer + Constants.delimiter;
 
 					if (requestType != null && requestType.equalsIgnoreCase("replace")) {
 						sessionObj.setMessage(request.getParameter("message"));
