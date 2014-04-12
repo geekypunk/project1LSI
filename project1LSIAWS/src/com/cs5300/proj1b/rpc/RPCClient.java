@@ -25,9 +25,11 @@ import com.cs5300.proj1b.views.ServerView;
  */
 public class RPCClient {
 	private static ServerView serverView;
-	public RPCClient(ServletContext ctx){
-		serverView =  (ServerView) ctx.getAttribute("serverView");
+
+	public RPCClient(ServletContext ctx) {
+		serverView = (ServerView) ctx.getAttribute("serverView");
 	}
+
 	static int callId = -1;
 	private final static Logger LOGGER = Logger.getLogger(RPCClient.class
 			.getName());
@@ -56,17 +58,18 @@ public class RPCClient {
 			// Unique call Id, operation ID, session ID, session version No
 			String outBufString = tempCallId + Constants.delimiter
 					+ Operation.SESSION_READ + Constants.delimiter + sessionID
-					+ Constants.delimiter + sessionVersionNo + Constants.delimiter;
+					+ Constants.delimiter + sessionVersionNo
+					+ Constants.delimiter;
 			byte[] outBuf = outBufString.getBytes();
 
 			// sending to multiple [destAddr, destPort] pairs
 			// using a single pre-existing DatagramSocket object rpcSocket
 			for (String ipAddress : destinationAddresses) {
-				
-				//Do not send to NULL server
-				if(Constants.NULL_ADDRESS.equals(ipAddress))
+
+				// Do not send to NULL server
+				if (Constants.NULL_ADDRESS.equals(ipAddress))
 					continue;
-				
+
 				LOGGER.info("Sending SESSION_READ request to server "
 						+ ipAddress);
 				DatagramPacket sendPkt = new DatagramPacket(outBuf,
@@ -90,17 +93,16 @@ public class RPCClient {
 				String data = new String(recvPkt.getData());
 				parts = data.split(Constants.delimiter);
 
-			} while (!parts[0].equals(String.valueOf(tempCallId)) && !parts[1].equals("-1"));
+			} while (!parts[0].equals(String.valueOf(tempCallId))
+					&& !parts[1].equals("-1"));
 
 			// Add to views on getting response
-			serverView.insert(recvPkt.getAddress()
-					.getHostAddress());
+			serverView.insert(recvPkt.getAddress().getHostAddress());
 			LOGGER.info("Inserted " + recvPkt.getAddress().getHostAddress()
 					+ " to views");
 
-		} 
-		catch(SocketTimeoutException ste){
-			
+		} catch (SocketTimeoutException ste) {
+
 			for (String ipAddress : destinationAddresses) {
 				serverView.remove(ipAddress);
 				LOGGER.warning("Timeout occurred. Removed server " + ipAddress
@@ -110,14 +112,13 @@ public class RPCClient {
 
 			recvPkt = null;
 
-		}
-		catch (InterruptedIOException iioe) {
+		} catch (InterruptedIOException iioe) {
 
 			// Remove from views on time out
 			for (String ipAddress : destinationAddresses) {
 				serverView.remove(ipAddress);
-				LOGGER.warning("InterruptedIOException occurred. Removed server " + ipAddress
-						+ " from views");
+				LOGGER.warning("InterruptedIOException occurred. Removed server "
+						+ ipAddress + " from views");
 
 			}
 
@@ -130,7 +131,8 @@ public class RPCClient {
 		} finally {
 			rpcSocket.close();
 		}
-		return new String(recvPkt.getAddress().getHostAddress() + Constants.delimiter + recvPkt.getData());
+		return new String(recvPkt.getAddress().getHostAddress()
+				+ Constants.delimiter + recvPkt.getData());
 	}
 
 	/**
@@ -153,39 +155,39 @@ public class RPCClient {
 		DatagramSocket rpcSocket = null;
 		try {
 			rpcSocket = new DatagramSocket();
-			
 
-			if(destinationAddresses.isEmpty()){
+			if (destinationAddresses.isEmpty()) {
 				FIND_BACKUP = true;
 				destinationAddresses = new HashSet<String>(serverView.getView());
-				if(destinationAddresses.isEmpty()){
+				if (destinationAddresses.isEmpty()) {
 					return Constants.NULL_ADDRESS;
 				}
 			}
-			
+
 			// Unique call Id, operation Id, session ID, version number, data,
 			// discard time
 			String outBufString = tempCallId + Constants.delimiter
-					+ Operation.SESSION_WRITE+ Constants.delimiter + sessionID
+					+ Operation.SESSION_WRITE + Constants.delimiter + sessionID
 					+ Constants.delimiter + version + Constants.delimiter
-					+ data + Constants.delimiter + discardTime + Constants.delimiter;
+					+ data + Constants.delimiter + discardTime
+					+ Constants.delimiter;
 			byte[] outBuf = outBufString.getBytes();
 
 			// sending to multiple [destAddr, destPort] pairs
 			// using a single pre-existing DatagramSocket object rpcSocket
 			for (String ipAddress : destinationAddresses) {
-				
-				//Do not send to NULL server
-				if(Constants.NULL_ADDRESS.equals(ipAddress))
+
+				// Do not send to NULL server
+				if (Constants.NULL_ADDRESS.equals(ipAddress))
 					continue;
-				
+
 				LOGGER.info("Sending SESSION_WRITE request to server "
 						+ ipAddress);
 				DatagramPacket sendPkt = new DatagramPacket(outBuf,
 						outBuf.length, InetAddress.getByName(ipAddress),
 						Constants.port);
 				rpcSocket.send(sendPkt);
-			
+
 				// wait for response
 				String parts[] = null;
 				byte[] inBuf = new byte[10];
@@ -208,7 +210,7 @@ public class RPCClient {
 					} while (!parts[0].equals(String.valueOf(tempCallId)));
 				} catch (InterruptedIOException ie) {
 					recvPkt = null;
-					
+
 					// Remove from views on time out
 
 					serverView.remove(ipAddress);
@@ -220,17 +222,15 @@ public class RPCClient {
 
 				if (recvPkt != null) {
 					// Add to views on getting response
-					serverView.insert(recvPkt.getAddress()
-							.getHostAddress());
+					serverView.insert(recvPkt.getAddress().getHostAddress());
 					LOGGER.info("Inserted "
 							+ recvPkt.getAddress().getHostAddress()
 							+ " to views");
-					
-					if(FIND_BACKUP)
+
+					if (FIND_BACKUP)
 						return recvPkt.getAddress().getHostAddress();
 				}
 
-			
 			}
 		} catch (IOException e) {
 			LOGGER.warning("An IO error occurred attempting to write session with ID "
@@ -245,8 +245,8 @@ public class RPCClient {
 	}
 
 	/**
-	 * Returns view of the given server.
-	 * Returns empty list if there is no successful response
+	 * Returns view of the given server. Returns empty list if there is no
+	 * successful response
 	 * 
 	 * @param - ipAddress - Server's ip address, for which the view is requested
 	 * @return - Requested view
@@ -258,16 +258,15 @@ public class RPCClient {
 		HashSet<String> view = new HashSet<String>();
 		DatagramSocket rpcSocket = null;
 		DatagramPacket recvPkt = null;
-		
-		//Choose a random server
+
+		// Choose a random server
 		String ipAddress = serverView.choose();
-		if(ipAddress.equals(Constants.NULL_ADDRESS))
+		if (ipAddress.equals(Constants.NULL_ADDRESS))
 			return view;
-		
-		
+
 		int attempt = 0;
 		while (true) {
-			
+
 			try {
 				// Unique call Id, operation ID, session ID, session version No
 				String outBufString = tempCallId + Constants.delimiter
@@ -304,13 +303,11 @@ public class RPCClient {
 				}
 
 				// Add to views on getting response
-				serverView.insert(recvPkt.getAddress()
-						.getHostAddress());
+				serverView.insert(recvPkt.getAddress().getHostAddress());
 				LOGGER.info("Inserted " + recvPkt.getAddress().getHostAddress()
 						+ " to views");
-				
+
 				return view;
-				
 
 			} catch (InterruptedIOException iioe) {
 
@@ -320,25 +317,24 @@ public class RPCClient {
 						+ " from views");
 
 				recvPkt = null;
-				
 
 			} catch (IOException ioe) {
 				LOGGER.warning("An IO error occurred attempting to get view for server "
 						+ ipAddress);
 				LOGGER.warning(Utils.getStackTrace(ioe));
 			} finally {
-				attempt ++;
+				attempt++;
 
-				//Do not try for more than view size
-				if(attempt == ServerView.viewSize){
+				// Do not try for more than view size
+				if (attempt == ServerView.viewSize) {
 					return view;
 				}
 
 				ipAddress = serverView.choose();
-				if(ipAddress.equals(Constants.NULL_ADDRESS))
+				if (ipAddress.equals(Constants.NULL_ADDRESS))
 					return view;
 				rpcSocket.close();
-				
+
 			}
 		}
 

@@ -61,9 +61,7 @@ public class WebAppListener implements ServletContextListener {
 	    	ServerView serverView = new ServerView();
 	    	ctx.setAttribute("serverView", serverView);
 	    	
-	    	//Deepthi, why are you doing this? As I have already put the object in the servlet context
-	    	//SessionManager.serverView = serverView;
-	    	
+	   	    	
 	    	//Garbage collection
 	    	Timer time = new Timer(); // Instantiate Timer Object
 	    	SessionCleanUpDaemon st = new SessionCleanUpDaemon(); // Instantiate SheduledTask class

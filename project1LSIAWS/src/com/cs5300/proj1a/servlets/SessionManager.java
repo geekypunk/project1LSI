@@ -199,6 +199,13 @@ public class SessionManager extends HttpServlet {
 						String sessionData = rpcClient.sessionReadClient(
 								destinationAddresses, sessionID, version);
 						String data[] = sessionData.split(Constants.delimiter);
+						if(data.length < 3){
+							sessionObj = new SessionObject(DEFAULT_MSG,
+									Utils.getCurrentTimeInMillis() + cookieAge + SessionObject.DELTA);
+							sessionObj.setMessage(DEFAULT_MSG);
+							backupServer = Constants.NULL_ADDRESS;
+						}
+						else{
 						addressFound = data[0];
 						String foundVersion = String.valueOf(Integer
 								.parseInt(data[2]));
@@ -206,6 +213,7 @@ public class SessionManager extends HttpServlet {
 						sessionObj= new SessionObject(
 								message, -1);
 						sessionObj.setVersion(Integer.valueOf(foundVersion));
+						}
 					}
 					
 					if(backupServer.equals(Constants.NULL_ADDRESS)){

@@ -8,8 +8,10 @@ public class AWSSimpleDB {
 	public static void main(String args[]){
 		BootStrapView view  = new BootStrapView();
 		view.clearView();
+		
 		//view.insert("0.0.0.0");
 		System.out.println(view.getAsServerView());
+		System.out.println("...........");
 	}/*
 	private boolean addItem(String domain, String itemName) {
         try {

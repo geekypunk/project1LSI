@@ -37,7 +37,7 @@ public class BootStrapView {
 	public BootStrapView(){
 		AWSCredentialsProvider credentialsProvider = new ClasspathPropertiesFileCredentialsProvider();
 		simpleDBClient = new AmazonSimpleDBClient(credentialsProvider);
-		Region usWest2 = Region.getRegion(Regions.US_WEST_2);
+		Region usWest2 = Region.getRegion(Regions.US_EAST_1);
 		simpleDBClient.setRegion(usWest2);
 	}
 
