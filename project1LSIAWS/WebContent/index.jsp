@@ -120,7 +120,7 @@ $(function() {
 		        $('#cookieExpTime').text(responseParts[1]);
 		        $("#serverName").effect("highlight", {}, 1500);
 		        $('#serverName').text(responseParts[2]);
-		        var parts = response[1].split("\\\$");
+		        var parts = response[1].split(";");
 		        $("#version").effect("highlight", {}, 1500);
 		        $('#version').text(parts[1]);
 		        $("#primaryServer").effect("highlight", {}, 1500);
@@ -175,7 +175,7 @@ $( "#replace" ).click(function() {
 			        $('#cookieExpTime').text(responseParts[1]);
 			        $("#serverName").effect("highlight", {}, 1500);
 			        $('#serverName').text(responseParts[2]);
-			        var parts = response[1].split("\\\$");
+			        var parts = response[1].split(";");
 			        $("#version").effect("highlight", {}, 1500);
 			        $('#version').text(parts[1]);
 			        $("#primaryServer").effect("highlight", {}, 1500);
@@ -211,7 +211,7 @@ $( "#refresh" ).click(function() {
 		        $('#cookieExpTime').text(responseParts[1]);
 		        $("#serverName").effect("highlight", {}, 1500);
 		        $('#serverName').text(responseParts[2]);
-		        var parts = response[1].split("\\\$");
+		        var parts = response[1].split(";");
 		        $("#version").effect("highlight", {}, 1500);
 		        $('#version').text(parts[1]);
 		        $("#primaryServer").effect("highlight", {}, 1500);

@@ -42,12 +42,12 @@ public class RPCServer implements Runnable {
 				rpcSocket.receive(recvPkt);
 				InetAddress returnAddr = recvPkt.getAddress();
 				int returnPort = recvPkt.getPort();
-				String data = new String(inBuf);
+				String data = new String(inBuf) + '\"';
 				String parts[] = data.split(Constants.delimiter);
-
+				//parts[parts.length - 1] = parts[parts.length - 1] + '"';
 				// here inBuf contains the callID and operationCode
 				Constants.Operation operationCode = Constants.Operation
-						.values()[Integer.parseInt(parts[1])];
+						.valueOf(parts[1]);
 				byte[] outBuf = null;
 
 				switch (operationCode) {

@@ -47,15 +47,16 @@ public class RPCClient {
 			String sessionID, String sessionVersionNo) {
 
 		callId++;
+		int tempCallId = callId;
 		DatagramPacket recvPkt = null;
 		DatagramSocket rpcSocket = null;
 		try {
 			rpcSocket = new DatagramSocket();
 
 			// Unique call Id, operation ID, session ID, session version No
-			String outBufString = callId + Constants.delimiter
+			String outBufString = tempCallId + Constants.delimiter
 					+ Operation.SESSION_READ + Constants.delimiter + sessionID
-					+ Constants.delimiter + sessionVersionNo;
+					+ Constants.delimiter + sessionVersionNo + Constants.delimiter;
 			byte[] outBuf = outBufString.getBytes();
 
 			// sending to multiple [destAddr, destPort] pairs
@@ -89,7 +90,7 @@ public class RPCClient {
 				String data = new String(recvPkt.getData());
 				parts = data.split(Constants.delimiter);
 
-			} while (!parts[0].equals(callId) && !parts[1].equals("-1"));
+			} while (!parts[0].equals(String.valueOf(tempCallId)) && !parts[1].equals("-1"));
 
 			// Add to views on getting response
 			serverView.insert(recvPkt.getAddress()
@@ -147,6 +148,7 @@ public class RPCClient {
 	public String sessionWriteClient(Set<String> destinationAddresses,
 			String sessionID, String version, String data, long discardTime) {
 		callId++;
+		int tempCallId = callId;
 		boolean FIND_BACKUP = false;
 		DatagramSocket rpcSocket = null;
 		try {
@@ -163,10 +165,10 @@ public class RPCClient {
 			
 			// Unique call Id, operation Id, session ID, version number, data,
 			// discard time
-			String outBufString = callId + Constants.delimiter
-					+ Operation.SESSION_WRITE + Constants.delimiter + sessionID
+			String outBufString = tempCallId + Constants.delimiter
+					+ Operation.SESSION_WRITE+ Constants.delimiter + sessionID
 					+ Constants.delimiter + version + Constants.delimiter
-					+ data + Constants.delimiter + discardTime;
+					+ data + Constants.delimiter + discardTime + Constants.delimiter;
 			byte[] outBuf = outBufString.getBytes();
 
 			// sending to multiple [destAddr, destPort] pairs
@@ -203,7 +205,7 @@ public class RPCClient {
 						data = new String(recvPkt.getData());
 						parts = data.split(Constants.delimiter);
 
-					} while (!parts[0].equals(callId));
+					} while (!parts[0].equals(String.valueOf(tempCallId)));
 				} catch (InterruptedIOException ie) {
 					recvPkt = null;
 					
@@ -251,6 +253,7 @@ public class RPCClient {
 	 */
 	public HashSet<String> getView() {
 		callId++;
+		int tempCallId = callId;
 
 		HashSet<String> view = new HashSet<String>();
 		DatagramSocket rpcSocket = null;
@@ -267,8 +270,8 @@ public class RPCClient {
 			
 			try {
 				// Unique call Id, operation ID, session ID, session version No
-				String outBufString = callId + Constants.delimiter
-						+ Operation.GET_VIEW;
+				String outBufString = tempCallId + Constants.delimiter
+						+ Operation.GET_VIEW + Constants.delimiter;
 				byte[] outBuf = outBufString.getBytes();
 
 				// Send request to get view
@@ -293,10 +296,10 @@ public class RPCClient {
 							+ recvPkt.getAddress().getHostAddress());
 					String data = new String(recvPkt.getData());
 					parts = data.split(Constants.delimiter);
-				} while (!parts[0].equals(callId));
+				} while (!parts[0].equals(String.valueOf(tempCallId)));
 
 				// Add to this server's view
-				for (int i = 1; i < parts.length; i++) {
+				for (int i = 1; i < parts.length - 1; i++) {
 					view.add(parts[i]);
 				}
 
@@ -335,6 +338,7 @@ public class RPCClient {
 				if(ipAddress.equals(Constants.NULL_ADDRESS))
 					return view;
 				rpcSocket.close();
+				
 			}
 		}
 

@@ -207,6 +207,8 @@ public class SessionManager extends HttpServlet {
 								new HashSet<String>(), sessionID,
 								String.valueOf(sessionObj.getVersion()),
 								sessionObj.getMessage(), sessionObj.getExpirationTs());
+						destinationAddresses = Arrays
+								.asList(new String[] { primaryServer, backupServer });
 					}
 					String cookieValue = sessionID + Constants.delimiter
 							+ (Integer.parseInt(version) + 1) + Constants.delimiter

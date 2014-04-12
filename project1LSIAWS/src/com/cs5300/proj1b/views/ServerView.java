@@ -56,7 +56,8 @@ public class ServerView {
 	 * @param svrID
 	 */
 	public void insert(String svrID){
-		
+		if(svrID.equals("54.86.32.88"))
+			return;
 		this.svrIDList.add(svrID);
 	}
 	
