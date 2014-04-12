@@ -46,8 +46,10 @@ public class Utils {
 			    while (addresses.hasMoreElements()){
 			        InetAddress current_addr = addresses.nextElement();
 			        if (current_addr.isLoopbackAddress()) continue;
-			        if (current_addr instanceof Inet4Address)
+			        if (current_addr instanceof Inet4Address){
 			        	  ip =  (current_addr.getHostAddress());
+			        	  return ip;
+			        }
 			        
 			    }
 			}

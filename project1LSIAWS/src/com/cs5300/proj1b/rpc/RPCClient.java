@@ -147,9 +147,10 @@ public class RPCClient {
 	 * 
 	 * @return IP of the server responded
 	 */
-	public String sessionWriteClient(Set<String> destinationAddresses,
-			String sessionID, String version, String data, long discardTime) {
+	public HashSet<String> sessionWriteClient(Set<String> destinationAddresses,
+			String sessionID, String version, String data, long discardTime, int k) {
 		callId++;
+		HashSet<String> backupAddresses = new HashSet<String>();
 		int tempCallId = callId;
 		boolean FIND_BACKUP = false;
 		DatagramSocket rpcSocket = null;
@@ -160,7 +161,7 @@ public class RPCClient {
 				FIND_BACKUP = true;
 				destinationAddresses = new HashSet<String>(serverView.getView());
 				if (destinationAddresses.isEmpty()) {
-					return Constants.NULL_ADDRESS;
+					return backupAddresses;
 				}
 			}
 
@@ -216,7 +217,7 @@ public class RPCClient {
 					serverView.remove(ipAddress);
 					LOGGER.warning("Timeout occurred. Removed server "
 							+ ipAddress + " from views");
-					return Constants.NULL_ADDRESS;
+					
 
 				}
 
@@ -227,8 +228,9 @@ public class RPCClient {
 							+ recvPkt.getAddress().getHostAddress()
 							+ " to views");
 
-					if (FIND_BACKUP)
-						return recvPkt.getAddress().getHostAddress();
+					if (FIND_BACKUP){
+						backupAddresses.add(recvPkt.getAddress().getHostAddress());						
+					}
 				}
 
 			}
@@ -241,7 +243,7 @@ public class RPCClient {
 		}
 
 		// return null address, if no backup is found
-		return Constants.NULL_ADDRESS;
+		return backupAddresses;
 	}
 
 	/**

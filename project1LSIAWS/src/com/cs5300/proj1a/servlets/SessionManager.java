@@ -36,6 +36,8 @@ import com.cs5300.proj1b.views.ServerView;
 @WebServlet("/SessionManager")
 public class SessionManager extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
+	private final int k = 2;
 
 	// Display message
 	public static String DEFAULT_MSG = "Hello User!";
@@ -57,7 +59,7 @@ public class SessionManager extends HttpServlet {
 	private static RPCClient rpcClient;
 	private final static Logger LOGGER = Logger.getLogger(SessionManager.class
 			.getName());
-	private static String new_backup;
+	private static HashSet<String> new_backup;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -130,14 +132,21 @@ public class SessionManager extends HttpServlet {
 				// server
 				String[] parts = sessionID.split("_");
 				String localServer = parts[1];
+				String backupServer = "";
 
-				new_backup = rpcClient.sessionWriteClient(
-						new HashSet<String>(), sessionID,
-						String.valueOf(sessionObj.getVersion()),
-						sessionObj.getMessage(), sessionObj.getExpirationTs());
+				for(int i=0; i < k; i++){
+					new_backup = rpcClient.sessionWriteClient(
+							new HashSet<String>(), sessionID,
+							String.valueOf(sessionObj.getVersion()),
+							sessionObj.getMessage(), sessionObj.getExpirationTs(), k);
+					for(String t : new_backup){
+						backupServer = t + Constants.delimiter;
+					}
+					
+				}
 
 				String location_metadata = localServer + Constants.delimiter
-						+ new_backup;
+						+ backupServer;
 				List<String> destinationAddresses = new LinkedList<String>();
 				destinationAddresses.add(localServer);
 
@@ -161,7 +170,10 @@ public class SessionManager extends HttpServlet {
 				String sessionID = parts[0];
 				String version = parts[1];
 				String primaryServer = parts[2];
-				String backupServer = parts[3];				
+				new_backup.clear();
+				for(int x = 3; x < parts.length; x ++){
+					new_backup.add(parts[x]);
+				}
 			
 				
 	
@@ -180,12 +192,13 @@ public class SessionManager extends HttpServlet {
 				} else {
 					SessionObject sessionObj = null;
 					List<String> destinationAddresses = Arrays
-							.asList(new String[] { primaryServer, backupServer });
+							.asList(new String[] { primaryServer });
+					destinationAddresses.addAll(new_backup);
 					String addressFound = Utils.SERVER_IP;
 
 					// If the local server is same as primary or backup
 					if (Utils.SERVER_IP.equals(primaryServer)
-							|| Utils.SERVER_IP.equals(backupServer)) {
+							|| new_backup.contains(Utils.SERVER_IP)) {
 						sessionObj = sessionTable.get(sessionID);
 
 						if(sessionObj == null){
@@ -203,7 +216,7 @@ public class SessionManager extends HttpServlet {
 							sessionObj = new SessionObject(DEFAULT_MSG,
 									Utils.getCurrentTimeInMillis() + cookieAge + SessionObject.DELTA);
 							sessionObj.setMessage(DEFAULT_MSG);
-							backupServer = Constants.NULL_ADDRESS;
+							new_backup.clear();
 						}
 						else{
 						addressFound = data[0];
@@ -216,13 +229,19 @@ public class SessionManager extends HttpServlet {
 						}
 					}
 					
-					if(backupServer.equals(Constants.NULL_ADDRESS)){
-						backupServer = rpcClient.sessionWriteClient(
+					if(new_backup.isEmpty()){
+						new_backup = rpcClient.sessionWriteClient(
 								new HashSet<String>(), sessionID,
 								String.valueOf(sessionObj.getVersion()),
-								sessionObj.getMessage(), sessionObj.getExpirationTs());
+								sessionObj.getMessage(), sessionObj.getExpirationTs(), k);
 						destinationAddresses = Arrays
-								.asList(new String[] { primaryServer, backupServer });
+								.asList(new String[] { primaryServer});
+						destinationAddresses.addAll(new_backup);
+					}
+					
+					String backupServer = "";
+					for(String t : new_backup){
+						backupServer += t + Constants.delimiter;
 					}
 					String cookieValue = sessionID + Constants.delimiter
 							+ (Integer.parseInt(version) + 1) + Constants.delimiter
@@ -236,19 +255,15 @@ public class SessionManager extends HttpServlet {
 					sessionObj.setExpirationTs(Utils.getCurrentTimeInMillis()
 							+ cookieAge + SessionObject.DELTA);
 					if (Utils.SERVER_IP.equals(primaryServer)
-							|| Utils.SERVER_IP.equals(backupServer)) {
+							|| new_backup.contains(Utils.SERVER_IP)) {
 						sessionTable.put(sessionID, sessionObj);
-						String otherServer = Utils.SERVER_IP
-								.equals(primaryServer) ? backupServer
-								: primaryServer;
-						destinationAddresses = Arrays
-								.asList(new String[] { otherServer });
+						destinationAddresses.remove(Utils.sessionNumber);
 					}
 
 					rpcClient.sessionWriteClient(new HashSet<String>(
 							destinationAddresses), sessionID, String
 							.valueOf(sessionObj.getVersion()), sessionObj
-							.getMessage(), sessionObj.getExpirationTs());
+							.getMessage(), sessionObj.getExpirationTs(), k);
 					result = sessionObj.toString();
 					
 

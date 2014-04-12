@@ -49,7 +49,7 @@ public class WebAppListener implements ServletContextListener {
     		ServletContext ctx = sce.getServletContext();
     		
     		//Change for AWS
-	    	Utils.SERVER_IP = Utils.getIP();
+	    	Utils.SERVER_IP = Utils.getPublicIP();
 	    	
 	    	//Put Bootstrap view in context
 	    	BootStrapView bootStrapView = new BootStrapView();
