@@ -21,7 +21,7 @@ public class SessionObject {
 		this.sessionId = Utils.sessionNumber+"_"+Utils.SERVER_IP;
 		this.version = 0;
 		this.message = message;
-		this.expirationTs = expTs;
+		this.expirationTs = expTs+DELTA;
 		Utils.sessionNumber++;
 	}
 	/**

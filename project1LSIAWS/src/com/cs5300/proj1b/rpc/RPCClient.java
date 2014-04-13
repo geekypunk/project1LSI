@@ -317,6 +317,7 @@ public class RPCClient {
 				serverView.remove(ipAddress);
 				LOGGER.warning("Timeout occurred. Removed server " + ipAddress
 						+ " from views");
+				LOGGER.warning(Utils.getStackTrace(iioe));
 
 				recvPkt = null;
 

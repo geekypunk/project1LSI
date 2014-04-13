@@ -9,6 +9,7 @@ import javax.servlet.ServletContext;
 
 import com.cs5300.proj1a.dao.SessionObject;
 import com.cs5300.proj1a.servlets.SessionManager;
+import com.cs5300.proj1a.utils.Utils;
 import com.cs5300.proj1b.views.ServerView;
 
 /**
@@ -35,7 +36,7 @@ public class RPCServer implements Runnable {
 		DatagramPacket recvPkt = null;
 		try {
 			rpcSocket = new DatagramSocket(Constants.port);
-			LOGGER.info("Listening on "+ rpcSocket.getInetAddress().getHostAddress());
+			//LOGGER.info("Listening on "+ rpcSocket.getInetAddress().getHostAddress());
 			while (true) {
 				// Read the packet
 				byte[] inBuf = new byte[Constants.maxPacketSize];
@@ -85,6 +86,7 @@ public class RPCServer implements Runnable {
 			}
 		} catch (Exception e) {
 			recvPkt = null;
+			LOGGER.info(Utils.getStackTrace(e));
 		} finally {
 			rpcSocket.close();
 		}
@@ -171,12 +173,10 @@ public class RPCServer implements Runnable {
 
 		LOGGER.info("Received GET_VIEW request");
 
-		String response = callId;
+		String response = callId+Constants.delimiter;
 		for (String view : serverView.getView()) {
 			response += view+Constants.delimiter;
 		}
-		if(response.equalsIgnoreCase(callId))
-			response +=Constants.delimiter;
 		LOGGER.info("Retrieved view");
 		return response.getBytes();
 	}

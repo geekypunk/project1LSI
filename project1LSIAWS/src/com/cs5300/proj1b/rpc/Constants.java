@@ -8,6 +8,6 @@ public class Constants {
 	public final static int maxPacketSize = 512;
 	public final static int port = 5300;
 	public final static String delimiter = "#";
-	public final static int timeout = 5000;  //30 seconds
+	public final static int timeout = 15000;  //30 seconds
 	public final static String NULL_ADDRESS = "0.0.0.0";
 }

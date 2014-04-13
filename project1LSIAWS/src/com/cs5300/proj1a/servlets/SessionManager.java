@@ -122,7 +122,7 @@ public class SessionManager extends HttpServlet {
 
 				// Create a new session object
 				SessionObject sessionObj = new SessionObject(DEFAULT_MSG,
-						Utils.getCurrentTimeInMillis() + cookieAge + SessionObject.DELTA);
+						Utils.getCurrentTimeInMillis() + cookieAge);
 				sessionObj.setMessage(DEFAULT_MSG);
 				String sessionID = sessionObj.getSessionId();
 				System.out.println("Creating session:" + sessionID);
