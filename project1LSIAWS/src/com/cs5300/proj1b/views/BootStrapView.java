@@ -60,9 +60,6 @@ public class BootStrapView {
 	}
 	
 	public void insert(String svrID){
-		if(svrID.equals("54.86.32.88"))
-			return;
-		
 		GetAttributesRequest getAttributesRequest = new GetAttributesRequest(DOMAIN,ITEM_NAME);
 		GetAttributesResult result = simpleDBClient.getAttributes(getAttributesRequest);
 		String currentView = result.getAttributes().get(0).getValue();
