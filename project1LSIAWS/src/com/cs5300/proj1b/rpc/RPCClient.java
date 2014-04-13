@@ -229,7 +229,9 @@ public class RPCClient {
 							+ " to views");
 
 					if (FIND_BACKUP){
-						backupAddresses.add(recvPkt.getAddress().getHostAddress());						
+						backupAddresses.add(recvPkt.getAddress().getHostAddress());	
+						if(backupAddresses.size() == k)
+							return backupAddresses;
 					}
 				}
 

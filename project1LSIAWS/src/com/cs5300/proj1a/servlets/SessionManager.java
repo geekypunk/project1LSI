@@ -232,11 +232,11 @@ public class SessionManager extends HttpServlet {
 						}
 					}
 					
-					if(new_backup.isEmpty()){
-						new_backup = rpcClient.sessionWriteClient(
+					if(new_backup.size() < k){
+						new_backup.addAll(rpcClient.sessionWriteClient(
 								new HashSet<String>(), sessionID,
 								String.valueOf(sessionObj.getVersion()),
-								sessionObj.getMessage(), sessionObj.getExpirationTs(), k);			
+								sessionObj.getMessage(), sessionObj.getExpirationTs(), (k - new_backup.size())));			
 						
 					}
 					
