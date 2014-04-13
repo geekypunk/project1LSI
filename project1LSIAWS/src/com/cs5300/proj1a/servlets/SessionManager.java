@@ -107,10 +107,12 @@ public class SessionManager extends HttpServlet {
 		String requestType = request.getParameter("param");
 
 		String sessionIdFromCookie = null;
+		Cookie requestCookie = null;
 		Cookie[] cookies = request.getCookies();
 		if (cookies != null) {
 			for (int i = 0; i < cookies.length; i++) {
 				if (cookies[i].getName().equals(COOKIE_NAME)) {
+					requestCookie = cookies[i];
 					sessionIdFromCookie = cookies[i].getValue();
 					break;
 				}
@@ -202,12 +204,12 @@ public class SessionManager extends HttpServlet {
 					// If the local server is same as primary or backup
 					if (Utils.SERVER_IP.equals(primaryServer)
 							|| new_backup.contains(Utils.SERVER_IP)) {
-						sessionObj = sessionTable.get(sessionID);
+						sessionObj = sessionTable.remove(sessionID);
 
 						if(sessionObj == null){
 							// Create a new session object
 							sessionObj = new SessionObject(DEFAULT_MSG,
-									Utils.getCurrentTimeInMillis() + cookieAge + SessionObject.DELTA);
+									Utils.getCurrentTimeInMillis() + cookieAge);
 							sessionObj.setMessage(DEFAULT_MSG);
 						}
 					} else {
@@ -217,7 +219,7 @@ public class SessionManager extends HttpServlet {
 						String data[] = sessionData.split(Constants.delimiter);
 						if(data.length < 3){
 							sessionObj = new SessionObject(DEFAULT_MSG,
-									Utils.getCurrentTimeInMillis() + cookieAge + SessionObject.DELTA);
+									Utils.getCurrentTimeInMillis() + cookieAge);
 							sessionObj.setMessage(DEFAULT_MSG);
 							new_backup.clear();
 						}
@@ -284,6 +286,10 @@ public class SessionManager extends HttpServlet {
 
 			}
 		} catch (Exception e) {
+			if(requestCookie!=null){
+				requestCookie.setMaxAge(0);
+				response.addCookie(requestCookie);
+			}
 			responseWriter.write("You are using an invalid cookie.");
 			LOGGER.info(Utils.getStackTrace(e));
 		}

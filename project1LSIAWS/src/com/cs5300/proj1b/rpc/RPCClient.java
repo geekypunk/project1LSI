@@ -131,7 +131,7 @@ public class RPCClient {
 		} finally {
 			rpcSocket.close();
 		}
-		return new String(recvPkt.getAddress().getHostAddress()
+		return recvPkt==null ? String.valueOf(tempCallId) : new String(recvPkt.getAddress().getHostAddress()
 				+ Constants.delimiter + recvPkt.getData());
 	}
 
