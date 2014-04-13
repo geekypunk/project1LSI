@@ -218,10 +218,14 @@ public class SessionManager extends HttpServlet {
 								destinationAddresses, sessionID, version);
 						String data[] = sessionData.split(Constants.delimiter);
 						if(data.length < 3){
-							sessionObj = new SessionObject(DEFAULT_MSG,
+							/*sessionObj = new SessionObject(DEFAULT_MSG,
 									Utils.getCurrentTimeInMillis() + cookieAge);
 							sessionObj.setMessage(DEFAULT_MSG);
-							new_backup.clear();
+							new_backup.clear();*/
+							responseWriter.write("Both primary and backup servers failed to respond before time out. Please logout to create a new session");
+							requestCookie.setMaxAge(0);
+							response.addCookie(requestCookie);
+							return;
 						}
 						else{
 						addressFound = data[0];
