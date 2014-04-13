@@ -1,5 +1,6 @@
 package com.cs5300.proj1a.listeners;
 
+import java.util.Properties;
 import java.util.Random;
 import java.util.Timer;
 import java.util.logging.Logger;
@@ -8,6 +9,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+
+
+
 
 import com.cs5300.proj1a.daemons.BootStrapViewUpdate;
 import com.cs5300.proj1a.daemons.SessionCleanUpDaemon;
@@ -27,19 +31,29 @@ public class WebAppListener implements ServletContextListener {
 
    
 	private final static Logger LOGGER = Logger.getLogger(WebAppListener.class.getName());
-	private static int CLEANUP_INTERVAL = 100*1000; // Time intervals in which session cleanup daemon is invoked 
-	private static final int BOOT_SERVER_UPDATE_SECS = 15*1000;
-	private static final int GOSSIP_SECS = 5*1000;
-	 /**
+	
+	// Time intervals in which session cleanup daemon(Garbage collection) is invoked 
+	private static int CLEANUP_INTERVAL = 300*1000; 
+	
+	// Time intervals in which BootStrapViewUpdate daemon is invoked 
+	private static final int BOOT_SERVER_UPDATE_SECS = 15*1000; 
+	
+	// Time intervals in which ViewUpdate daemon is invoked 
+	private static final int GOSSIP_SECS = 10*1000;
+	 
+	/**
      * Default constructor. 
      * 
      */
 	public WebAppListener() {
-        // TODO Auto-generated constructor stub
     	
     }
 
 	/**
+	 * <p><b>Actions being done:</b></p>
+	 * <p>-->Get and cache the EC2 instance public IP</p>
+	 * <p>-->Initilize the server and bootstrap views and put them in ServletContext</p>
+	 * <p>-->Initialization of all daemons</p>
      * @see ServletContextListener#contextInitialized(ServletContextEvent)
      */
     public void contextInitialized(ServletContextEvent sce) {
@@ -48,7 +62,11 @@ public class WebAppListener implements ServletContextListener {
     		Random generator = new Random();
     		ServletContext ctx = sce.getServletContext();
     		
-    		//Change for AWS
+    		//Load properties file. For now it has 1 parameter indicating k-resilience
+    		Properties config = new Properties();
+    		config.load(ctx.getResourceAsStream("/WEB-INF/config.properties"));
+    		ctx.setAttribute("resilienceFactor", Integer.parseInt(config.getProperty("K_RESILIENCE_PARAM")));
+			//Change for AWS/Local machine
 	    	Utils.SERVER_IP = Utils.getPublicIP();
 	    	
 	    	//Put Bootstrap view in context
@@ -72,12 +90,10 @@ public class WebAppListener implements ServletContextListener {
 			BootStrapViewUpdate bViewUp = new BootStrapViewUpdate(ctx);
 			timer2.schedule(bViewUp, 0, (BOOT_SERVER_UPDATE_SECS/2) + generator.nextInt( BOOT_SERVER_UPDATE_SECS ));
 			
-			//TODO: Uncomment code below, once servlet code is ready
 			//Start Gossip among servers
 			Timer timer3 = new Timer();
 			ViewUpdate viewUpdate = new ViewUpdate(ctx, new RPCClient(ctx));
 			timer3.schedule(viewUpdate, 0, (GOSSIP_SECS/2) + generator.nextInt( GOSSIP_SECS ));
-			
 			
 			//The RPC server thread
 			new Thread(new RPCServer(ctx)).start();

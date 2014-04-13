@@ -40,12 +40,13 @@ public class ServerView {
 	}
 	
 	/**
-	 * Shrink the View of this server if its size is greater than k
+	 * Shrink the View of this server. 
+	 * While it contains more than k entries, delete an entry chosen uniformly at random
 	 * @param k
 	 */
 	public void shrink(int k){
 		
-		if(this.svrIDList.size()>k){
+		while(this.svrIDList.size()>k){
 			
 			this.svrIDList.remove(randomGenerator.nextInt(this.svrIDList.size()));
 		}
@@ -105,6 +106,12 @@ public class ServerView {
 		this.svrIDList.clear();
 		this.svrIDList.addAll(_view.getView());
 	}
+	
+	
+	/**
+	 * Represent the values in the view by a _ seperated format
+	 * 
+	 */
 	@Override
 	public String toString(){
 		StringBuffer sb = new StringBuffer();

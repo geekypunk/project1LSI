@@ -1,19 +1,42 @@
 package com.cs5300.proj1.test;
 
+import java.util.ArrayList;
+
 import com.cs5300.proj1b.views.BootStrapView;
 
 
+/**
+ * @author kt466
+ *
+ * <p>Test class for managing SimpleDB</p>
+ */
 public class AWSSimpleDB {
 	
 	public static void main(String args[]){
+		
+		/*String backupServer = "";
+		ArrayList<String> new_backup = new ArrayList<String>();
+		new_backup.add("1");new_backup.add("1");new_backup.add("1");new_backup.add("1");
+		for(String t : new_backup){
+			backupServer += t + "_";
+		}
+
+		System.out.println(backupServer);
+		if(backupServer.endsWith("_")){
+			backupServer = backupServer.substring(0, backupServer.length() - 1);
+		}
+		System.out.println(backupServer);*/
+		clearBootStrap();
+	}
+	private static void clearBootStrap(){
 		BootStrapView view  = new BootStrapView();
 		System.out.println(view.getAsServerView());
 		view.clearView();
-		
-		//view.insert("0.0.0.0");
 		System.out.println(view.getAsServerView());
 		System.out.println("...........");
-	}/*
+		
+	}
+	/*
 	private boolean addItem(String domain, String itemName) {
         try {
             PutAttributesRequest putAttributesRequest = new PutAttributesRequest();

@@ -12,7 +12,7 @@ import com.cs5300.proj1b.rpc.RPCClient;
 import com.cs5300.proj1b.views.ServerView;
 
 /**
- * Read and update BootStrapView
+ * Read and update ServerView 
  * 
  * @author dr472
  * 

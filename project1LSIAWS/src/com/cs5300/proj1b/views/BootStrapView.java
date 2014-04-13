@@ -24,7 +24,7 @@ import com.amazonaws.services.simpledb.model.ReplaceableAttribute;
 
 /**
  * @author kt466
- * Class for manipulating the BootStrap View stored in Amazon SimpleDB
+ * <p>Class for manipulating the BootStrap View stored in Amazon SimpleDB</p>
  *
  */
 public class BootStrapView {
@@ -37,7 +37,7 @@ public class BootStrapView {
 	public BootStrapView(){
 		AWSCredentialsProvider credentialsProvider = new ClasspathPropertiesFileCredentialsProvider();
 		simpleDBClient = new AmazonSimpleDBClient(credentialsProvider);
-		Region usWest2 = Region.getRegion(Regions.US_EAST_1);
+		Region usWest2 = Region.getRegion(Regions.US_WEST_2); //Oregon
 		simpleDBClient.setRegion(usWest2);
 	}
 
@@ -46,6 +46,10 @@ public class BootStrapView {
 		simpleDBClient.setRegion(usWest2);
 	}
 	
+	/**
+	 * <p>Get the BootStrap view from SimpleDB as a {@link com.cs5300.proj1b.views.ServerView ServerView} object</p>
+	 * @return ServerView
+	 */
 	public ServerView getAsServerView(){
 		
 		GetAttributesRequest getAttributesRequest = new GetAttributesRequest(DOMAIN,ITEM_NAME);

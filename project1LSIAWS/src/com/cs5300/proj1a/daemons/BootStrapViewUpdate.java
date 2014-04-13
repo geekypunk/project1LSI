@@ -11,7 +11,7 @@ import com.cs5300.proj1b.views.BootStrapView;
 import com.cs5300.proj1b.views.ServerView;
 
 /**
- * Runs a daemon which periodically updates bootstrap view
+ * Runs a daemon which periodically updates @link com.cs5300.proj1b.views.BootStrapView BootStrapView}
  * @author kt466
  *
  */

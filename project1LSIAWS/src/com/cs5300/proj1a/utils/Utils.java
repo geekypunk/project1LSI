@@ -20,19 +20,26 @@ import java.util.logging.Logger;
  */
 public class Utils {
 	
+	
+	public static String SERVER_IP="";
+	public static int sessionNumber = 0;
+	private final static Logger LOGGER = Logger.getLogger(Utils.class.getName());
+	
 	/**
 	 * Returns the current server time
 	 * @return Date
 	 */
-	public static String SERVER_IP="";
-	public static int sessionNumber = 0;
-	private final static Logger LOGGER = Logger.getLogger(Utils.class.getName());
 	public static long getCurrentTimeInMillis(){
 		Date date= new Date();
         Timestamp currentTimestamp= new Timestamp(date.getTime());
         return currentTimestamp.getTime();
 	}
-	//Get ServerIP
+	
+	/** 
+	 * Get the local server IP. For debugging purposes
+	 * @return String
+	 * @throws Exception
+	 */
 	public static String getIP() throws Exception{
 		
 		String ip = null;
@@ -61,6 +68,7 @@ public class Utils {
 		}
 		return ip;
 	}
+	
 	public static String getStackTrace(final Throwable throwable) {
 	     final StringWriter sw = new StringWriter();
 	     final PrintWriter pw = new PrintWriter(sw, true);
@@ -68,6 +76,10 @@ public class Utils {
 	     return sw.getBuffer().toString();
 	}
 	
+	/**
+	 * Returns the EC2 public IP
+	 * @return String
+	 */
 	public static String getPublicIP(){
 		String output = null;
 	    try {  

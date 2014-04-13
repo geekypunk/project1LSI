@@ -19,8 +19,9 @@ import com.cs5300.proj1b.views.BootStrapView;
 import com.cs5300.proj1b.views.ServerView;
 
 /**
- * Servlet reponsible for fetching the server and Bootstrap view
- * Servlet implementation class GetViews
+ * @author kt466
+ * <p><b>Servlet reponsible for fetching the server and Bootstrap view</b></p>
+ * 
  */
 @WebServlet("/GetViews")
 public class GetViews extends HttpServlet {

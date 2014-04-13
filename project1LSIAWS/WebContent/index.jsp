@@ -141,6 +141,7 @@ $(function() {
     
 });
 $( "#replace" ).click(function() {
+	
 	var oldMessage = $('#serverMsgDisplay').text().trim();
 	var newMessage = $('#serverMsgInput').val().trim();
 	if(newMessage.length ===0){
@@ -155,7 +156,9 @@ $( "#replace" ).click(function() {
 		if(newMessage.length>30){
 			newMessage = newMessage.substring(0,29);
 		}
-		
+		$('#loading').html(
+		    		'<img src="images/loading.GIF"> Loading!!...'
+		);
 		$.ajax({
 			    url : "SessionManager",
 			    type: "GET",
@@ -166,7 +169,7 @@ $( "#replace" ).click(function() {
 			    },
 			    success: function(data, textStatus, jqXHR)
 			    {
-			       
+			    	$('#loading').css('display', 'none');
 			    	var response = data.split("@");
 			    	var responseParts = response[0].split("|");
 			    	$("#serverMsgDisplay").effect("highlight", {}, 1500);
@@ -194,6 +197,9 @@ $( "#replace" ).click(function() {
 	}
 });
 $( "#refresh" ).click(function() {
+	$('#loading').html(
+    		'<img src="images/loading.GIF"> Loading!!...'
+	);
 	$.ajax({
 		    url : "SessionManager",
 		    type: "GET",
@@ -203,6 +209,7 @@ $( "#refresh" ).click(function() {
 		    },
 		    success: function(data, textStatus, jqXHR)
 		    {
+		    	$('#loading').css('display', 'none');
 		    	var response = data.split("@");
 		    	var responseParts = response[0].split("|");
 		    	$("#serverMsgDisplay").effect("highlight", {}, 1500);
@@ -254,7 +261,9 @@ $( "#refreshViews" ).click(function() {
 
 });
 function loadViews(){
-	
+	$('#loading').html(
+    		'<img src="images/loading.GIF"> Loading!!...'
+	);
     $.ajax({
 	    url : "GetViews",
 	    type: "GET",
@@ -270,6 +279,7 @@ function loadViews(){
 		    	window.location.reload();
 		    	
 	    	}else{
+	    		$('#loading').css('display', 'none');
 		    	var responseParts = data.split("|");
 		      	$("#bootStrapView").effect("highlight", {}, 1500);
 		      	$('#bootStrapView').text(responseParts[0]);

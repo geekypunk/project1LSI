@@ -3,7 +3,6 @@ package com.cs5300.proj1a.servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,8 +27,8 @@ import com.cs5300.proj1b.views.BootStrapView;
 import com.cs5300.proj1b.views.ServerView;
 
 /**
- * Servlet implementation class SessionManager This class handles all requests
- * and session maintenance
+ * <p>Servlet implementation class SessionManager</p> 
+ * <p>This class extends HttpServlet and handles all refresh/replace/logout requests along with session maintenance</p>
  * 
  * @author kt466
  */
@@ -37,7 +36,8 @@ import com.cs5300.proj1b.views.ServerView;
 public class SessionManager extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
-	private final int k = 2;
+	//Compile-time parameter indicating k-resilience
+	private  int resilenceFactor;
 
 	// Display message
 	public static String DEFAULT_MSG = "Hello User!";
@@ -78,6 +78,7 @@ public class SessionManager extends HttpServlet {
 		servletContext = config.getServletContext();
 		bootStrapView = (BootStrapView) servletContext.getAttribute("bootStrapView");
 		serverView = (ServerView) servletContext.getAttribute("serverView");
+		resilenceFactor = (Integer)servletContext.getAttribute("resilienceFactor");
 		LOGGER.info("bootStrapView:" + bootStrapView.getAsServerView());
 		LOGGER.info("serverView:" + serverView.getView());
 	}
@@ -140,11 +141,13 @@ public class SessionManager extends HttpServlet {
 					new_backup = rpcClient.sessionWriteClient(
 							new HashSet<String>(), sessionID,
 							String.valueOf(sessionObj.getVersion()),
-							sessionObj.getMessage(), sessionObj.getExpirationTs(), k);
+							sessionObj.getMessage(), sessionObj.getExpirationTs(), resilenceFactor);
 					for(String t : new_backup){
 						backupServer += t + '_';
 					}
-					
+					if(backupServer.endsWith("_")){
+						backupServer = backupServer.substring(0, backupServer.length() - 1);
+					}
 				
 
 				String location_metadata = localServer + Constants.delimiter
@@ -238,11 +241,11 @@ public class SessionManager extends HttpServlet {
 						}
 					}
 					
-					if(new_backup.size() < k){
+					if(new_backup.size() < resilenceFactor){
 						new_backup.addAll(rpcClient.sessionWriteClient(
 								new HashSet<String>(), sessionID,
 								String.valueOf(sessionObj.getVersion()),
-								sessionObj.getMessage(), sessionObj.getExpirationTs(), (k - new_backup.size())));			
+								sessionObj.getMessage(), sessionObj.getExpirationTs(), (resilenceFactor - new_backup.size())));			
 						
 					}
 					
@@ -250,6 +253,10 @@ public class SessionManager extends HttpServlet {
 					for(String t : new_backup){
 						backupServer += t + "_";
 						destinationAddresses.add(t);
+					}
+					
+					if(backupServer.endsWith("_")){
+						backupServer = backupServer.substring(0, backupServer.length() - 1);
 					}
 					String cookieValue = sessionID + Constants.delimiter
 							+ (Integer.parseInt(version) + 1) + Constants.delimiter
@@ -271,7 +278,7 @@ public class SessionManager extends HttpServlet {
 					rpcClient.sessionWriteClient(new HashSet<String>(
 							destinationAddresses), sessionID, String
 							.valueOf(sessionObj.getVersion()), sessionObj
-							.getMessage(), sessionObj.getExpirationTs(), k);
+							.getMessage(), sessionObj.getExpirationTs(), resilenceFactor);
 					result = sessionObj.toString();
 					
 
