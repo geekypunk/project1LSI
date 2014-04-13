@@ -53,6 +53,8 @@ public class BootStrapView {
 		String[]ips = result.getAttributes().get(0).getValue().split("_");
 		Set<String> bootStrapViewIDs = new HashSet<String>();
 		bootStrapViewIDs.addAll(Arrays.asList(ips));
+		
+		bootStrapViewIDs.remove("");
 		ServerView _bootStrapView = new ServerView(bootStrapViewIDs);
 		return _bootStrapView; 
 	}

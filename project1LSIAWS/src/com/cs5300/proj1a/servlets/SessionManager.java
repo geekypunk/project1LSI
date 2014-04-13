@@ -140,7 +140,7 @@ public class SessionManager extends HttpServlet {
 							String.valueOf(sessionObj.getVersion()),
 							sessionObj.getMessage(), sessionObj.getExpirationTs(), k);
 					for(String t : new_backup){
-						backupServer = t + Constants.delimiter;
+						backupServer += t + '_';
 					}
 					
 				
@@ -170,9 +170,12 @@ public class SessionManager extends HttpServlet {
 				String sessionID = parts[0];
 				String version = parts[1];
 				String primaryServer = parts[2];
-				new_backup.clear();
-				for(int x = 3; x < parts.length; x ++){
-					new_backup.add(parts[x]);
+				String[] backups = parts[3].split("_");
+				
+				new_backup = new HashSet<String>();
+				for(int x = 0; x < backups.length; x ++){
+					if(!backups[x].isEmpty())
+						new_backup.add(backups[x]);
 				}
 			
 				
@@ -191,9 +194,9 @@ public class SessionManager extends HttpServlet {
 					response.addCookie(c);
 				} else {
 					SessionObject sessionObj = null;
-					List<String> destinationAddresses = Arrays
-							.asList(new String[] { primaryServer });
-					destinationAddresses.addAll(new_backup);
+					List<String> destinationAddresses = new ArrayList<String>();
+					destinationAddresses.add(primaryServer);
+					
 					String addressFound = Utils.SERVER_IP;
 
 					// If the local server is same as primary or backup
@@ -233,15 +236,14 @@ public class SessionManager extends HttpServlet {
 						new_backup = rpcClient.sessionWriteClient(
 								new HashSet<String>(), sessionID,
 								String.valueOf(sessionObj.getVersion()),
-								sessionObj.getMessage(), sessionObj.getExpirationTs(), k);
-						destinationAddresses = Arrays
-								.asList(new String[] { primaryServer});
-						destinationAddresses.addAll(new_backup);
+								sessionObj.getMessage(), sessionObj.getExpirationTs(), k);			
+						
 					}
 					
 					String backupServer = "";
 					for(String t : new_backup){
-						backupServer += t + Constants.delimiter;
+						backupServer += t + "_";
+						destinationAddresses.add(t);
 					}
 					String cookieValue = sessionID + Constants.delimiter
 							+ (Integer.parseInt(version) + 1) + Constants.delimiter
@@ -257,7 +259,7 @@ public class SessionManager extends HttpServlet {
 					if (Utils.SERVER_IP.equals(primaryServer)
 							|| new_backup.contains(Utils.SERVER_IP)) {
 						sessionTable.put(sessionID, sessionObj);
-						destinationAddresses.remove(Utils.sessionNumber);
+						destinationAddresses.remove(Utils.SERVER_IP);
 					}
 
 					rpcClient.sessionWriteClient(new HashSet<String>(
