@@ -222,7 +222,7 @@ public class SessionManager extends HttpServlet {
 									Utils.getCurrentTimeInMillis() + cookieAge);
 							sessionObj.setMessage(DEFAULT_MSG);
 							new_backup.clear();*/
-							responseWriter.write("Both primary and backup servers failed to respond before time out. Please logout to create a new session");
+							responseWriter.write("Both primary and backup servers failed to respond or the requested session might have timed out. Please logout to create a new session");
 							requestCookie.setMaxAge(0);
 							response.addCookie(requestCookie);
 							return;
