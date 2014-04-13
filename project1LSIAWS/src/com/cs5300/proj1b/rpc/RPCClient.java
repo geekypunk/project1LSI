@@ -37,13 +37,13 @@ public class RPCClient {
 	/**
 	 * Reads from primary and backup server, and returns found version and
 	 * data(version number, expiration timestamp) for given session ID,
-	 * delimited with '$'. Returns version number as -1, if the session is not
+	 * delimited with '#'. Returns version number as -1, if the session is not
 	 * found.
 	 * 
 	 * @param destinationAddresses
 	 * @param sessionID
 	 * @param sessionVersionNo
-	 * @return String containing found version and data delimited by '$'
+	 * @return String containing found version and data delimited by '#'
 	 */
 	public String sessionReadClient(List<String> destinationAddresses,
 			String sessionID, String sessionVersionNo) {
@@ -144,8 +144,9 @@ public class RPCClient {
 	 * @param version
 	 * @param data
 	 * @param discardTime
+	 * @param k 
 	 * 
-	 * @return IP of the server responded
+	 * @return set of IPs responded
 	 */
 	public HashSet<String> sessionWriteClient(Set<String> destinationAddresses,
 			String sessionID, String version, String data, long discardTime, int k) {
