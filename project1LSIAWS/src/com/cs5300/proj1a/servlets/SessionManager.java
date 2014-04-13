@@ -204,7 +204,7 @@ public class SessionManager extends HttpServlet {
 						if(sessionObj == null){
 							// Create a new session object
 							sessionObj = new SessionObject(DEFAULT_MSG,
-									Utils.getCurrentTimeInMillis() + cookieAge + SessionObject.DELTA);
+									Utils.getCurrentTimeInMillis() + cookieAge);
 							sessionObj.setMessage(DEFAULT_MSG);
 						}
 					} else {
