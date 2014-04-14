@@ -235,11 +235,19 @@ public class SessionManager extends HttpServlet {
 						String foundVersion = String.valueOf(Integer
 								.parseInt(data[2]));
 						String message = data[3];
-						sessionObj= new SessionObject(
-								message, -1);
+						sessionObj= new SessionObject(sessionId,version,
+								message);
 						sessionObj.setVersion(Integer.valueOf(foundVersion));
 						}
 					}
+					if (requestType != null && requestType.equalsIgnoreCase("replace")) {
+						sessionObj.setMessage(request.getParameter("message"));
+					}
+
+					sessionObj.incrementVersionNo();
+					sessionObj.setDiscardTs(Utils.getCurrentTimeInMillis()
+							+ cookieAge + SessionObject.DELTA);
+					
 					
 					if(new_backup.size() < resilenceFactor){
 						new_backup.addAll(rpcClient.sessionWriteClient(
@@ -262,13 +270,7 @@ public class SessionManager extends HttpServlet {
 							+ (Integer.parseInt(version) + 1) + Constants.delimiter
 							+ primaryServer + Constants.delimiter + backupServer;
 
-					if (requestType != null && requestType.equalsIgnoreCase("replace")) {
-						sessionObj.setMessage(request.getParameter("message"));
-					}
-
-					sessionObj.incrementVersionNo();
-					sessionObj.setDiscardTs(Utils.getCurrentTimeInMillis()
-							+ cookieAge + SessionObject.DELTA);
+					
 					if (Utils.SERVER_IP.equals(primaryServer)
 							|| new_backup.contains(Utils.SERVER_IP)) {
 						sessionTable.put(sessionID, sessionObj);

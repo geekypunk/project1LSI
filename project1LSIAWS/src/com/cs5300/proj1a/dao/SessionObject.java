@@ -26,6 +26,15 @@ public class SessionObject {
 		this.discardTs = expTs+DELTA;
 		Utils.sessionNumber++;
 	}
+	
+public SessionObject(String sessionID, String version, String message) throws Exception{
+		this.sessionId = sessionID;
+		this.version = Integer.valueOf(version);
+		this.message = message;
+	
+	}
+
+
 	/**
 	 * @return the sessionId
 	 */
