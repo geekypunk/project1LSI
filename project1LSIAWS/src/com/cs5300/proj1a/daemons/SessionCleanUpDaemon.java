@@ -12,7 +12,8 @@ import com.cs5300.proj1a.servlets.SessionManager;
 import com.cs5300.proj1a.utils.Utils;
 
 /**
- * This class implements the daemon for cleaning up expired sessions
+ * <p>This class implements the daemon for cleaning up expired sessions.</p>
+ * <p>Sessions are cleaned up by looking at their discard timstamp and comparing them with the local server time</p>
  * @author kt466
  *
  */

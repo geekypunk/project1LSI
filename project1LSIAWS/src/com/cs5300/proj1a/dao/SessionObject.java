@@ -78,7 +78,7 @@ public class SessionObject {
 	}
 
 	/**
-	 * Returns the discard time for this session object
+	 * Returns the discard date for this session object
 	 * @return Date expirationTs
 	 */
 	public Date getDiscardDate(){
@@ -87,7 +87,7 @@ public class SessionObject {
 	}
 	
 	/**
-	 * Returns the discard time for this session object
+	 * Returns the Expiration date for this session object
 	 * @return Date expirationTs
 	 */
 	public Date getExpirationDate(){
