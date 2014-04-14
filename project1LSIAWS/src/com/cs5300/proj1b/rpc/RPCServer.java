@@ -115,7 +115,7 @@ public class RPCServer implements Runnable {
 					.get(sessionID);
 			response = callId + Constants.delimiter + sessionObj.getVersion()
 					+ Constants.delimiter + sessionObj.getMessage()
-					+ Constants.delimiter + sessionObj.getExpirationDate();
+					+ Constants.delimiter + sessionObj.getDiscardDate();
 		} else {
 			response = callId + Constants.delimiter + -1;
 		}

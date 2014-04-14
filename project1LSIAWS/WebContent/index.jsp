@@ -30,8 +30,8 @@
 			<p id="serverMsgDisplay"></p>
 		</div>
 		<div>
-			<b>Local Server :</b> <br />
-			<p id="localServer"><%=Utils.SERVER_IP %></p>
+			<b>Request executed by :</b> <br />
+			<p id="localServer"></p>
 		</div>
 		<div>
 			<b>Primary Server :</b> <br />
@@ -51,8 +51,12 @@
 			<b>Version</b> <br />
 			<p id="version"></p>
 		</div>
+		
 		<b>Expiration time :</b>
 		<p id="cookieExpTime"></p>
+		<b>Discard time :</b>
+		<p id="cookieDiscardTime"></p>
+		
 		<div>
 			<b>Bootstrap View :</b> <br />
 			<p id="bootStrapView"></p>
@@ -114,12 +118,19 @@ $(function() {
 		    	$('#loading').css('display', 'none');
 		    	var response = data.split("@");
 		    	var responseParts = response[0].split("|");
+		    	
 		    	$("#serverMsgDisplay").effect("highlight", {}, 1500);
 		        $('#serverMsgDisplay').text(responseParts[0]);
+		      
 		        $("#cookieExpTime").effect("highlight", {}, 1500);
 		        $('#cookieExpTime').text(responseParts[1]);
+		      
+		        $("#cookieDiscardTime").effect("highlight", {}, 1500);
+		        $('#cookieDiscardTime').text(responseParts[2]);
+		        
 		        $("#serverName").effect("highlight", {}, 1500);
-		        $('#serverName').text(responseParts[2]);
+		        $('#serverName').text(responseParts[3]);
+		        
 		        var parts = response[1].split("#");
 		        $("#version").effect("highlight", {}, 1500);
 		        $('#version').text(parts[1]);
@@ -129,6 +140,10 @@ $(function() {
 		        $('#backupServer').text(parts[3]);
 		        $("#foundServer").effect("highlight", {}, 1500);
 		        $('#foundServer').text(parts[4]);
+		        
+		        $("#localServer").effect("highlight", {}, 1500);
+		        $('#localServer').text(response[2]);
+		       
 		        loadViews();
 
 		    },
@@ -172,13 +187,21 @@ $( "#replace" ).click(function() {
 			    	$('#loading').css('display', 'none');
 			    	var response = data.split("@");
 			    	var responseParts = response[0].split("|");
+
 			    	$("#serverMsgDisplay").effect("highlight", {}, 1500);
 			        $('#serverMsgDisplay').text(responseParts[0]);
+			      
 			        $("#cookieExpTime").effect("highlight", {}, 1500);
 			        $('#cookieExpTime').text(responseParts[1]);
+			      
+			        $("#cookieDiscardTime").effect("highlight", {}, 1500);
+			        $('#cookieDiscardTime').text(responseParts[2]);
+			        
 			        $("#serverName").effect("highlight", {}, 1500);
-			        $('#serverName').text(responseParts[2]);
+			        $('#serverName').text(responseParts[3]);
+			        
 			        var parts = response[1].split("#");
+			       
 			        $("#version").effect("highlight", {}, 1500);
 			        $('#version').text(parts[1]);
 			        $("#primaryServer").effect("highlight", {}, 1500);
@@ -187,6 +210,9 @@ $( "#replace" ).click(function() {
 			        $('#backupServer').text(parts[3]);
 			        $("#foundServer").effect("highlight", {}, 1500);
 			        $('#foundServer').text(parts[4]);
+			        
+			        $("#localServer").effect("highlight", {}, 1500);
+			        $('#localServer').text(response[2]);
 			    },
 			    error: function (jqXHR, textStatus, errorThrown)
 			    {
@@ -212,12 +238,19 @@ $( "#refresh" ).click(function() {
 		    	$('#loading').css('display', 'none');
 		    	var response = data.split("@");
 		    	var responseParts = response[0].split("|");
+
 		    	$("#serverMsgDisplay").effect("highlight", {}, 1500);
 		        $('#serverMsgDisplay').text(responseParts[0]);
+		      
 		        $("#cookieExpTime").effect("highlight", {}, 1500);
 		        $('#cookieExpTime').text(responseParts[1]);
+		      
+		        $("#cookieDiscardTime").effect("highlight", {}, 1500);
+		        $('#cookieDiscardTime').text(responseParts[2]);
+		        
 		        $("#serverName").effect("highlight", {}, 1500);
-		        $('#serverName').text(responseParts[2]);
+		        $('#serverName').text(responseParts[3]);
+		        
 		        var parts = response[1].split("#");
 		        $("#version").effect("highlight", {}, 1500);
 		        $('#version').text(parts[1]);
@@ -227,6 +260,10 @@ $( "#refresh" ).click(function() {
 		        $('#backupServer').text(parts[3]);
 		        $("#foundServer").effect("highlight", {}, 1500);
 		        $('#foundServer').text(parts[4]);
+		        
+		        $("#localServer").effect("highlight", {}, 1500);
+		        $('#localServer').text(response[2]);
+		        
 		    },
 		    error: function (jqXHR, textStatus, errorThrown)
 		    {

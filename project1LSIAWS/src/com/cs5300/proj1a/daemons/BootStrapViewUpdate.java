@@ -11,7 +11,7 @@ import com.cs5300.proj1b.views.BootStrapView;
 import com.cs5300.proj1b.views.ServerView;
 
 /**
- * Runs a daemon which periodically updates @link com.cs5300.proj1b.views.BootStrapView BootStrapView}
+ * Runs a daemon which periodically updates {@link com.cs5300.proj1b.views.BootStrapView BootStrapView}
  * @author kt466
  *
  */
@@ -30,7 +30,6 @@ public class BootStrapViewUpdate  extends TimerTask{
 		try{
 			ServerView _bootStrapView = this.bootStrapView.getAsServerView();
 			LOGGER.info("Old BootStrapView-->"+_bootStrapView);
-			System.out.println(_bootStrapView);
 			_bootStrapView.remove(Utils.SERVER_IP);
 			_bootStrapView.union(this.serverView.getView());		
 			_bootStrapView.shrink(5);	

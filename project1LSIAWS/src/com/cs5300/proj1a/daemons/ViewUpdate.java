@@ -12,7 +12,7 @@ import com.cs5300.proj1b.rpc.RPCClient;
 import com.cs5300.proj1b.views.ServerView;
 
 /**
- * Read and update ServerView 
+ * Read and update {@link com.cs5300.proj1b.views.ServerView ServerView}
  * 
  * @author dr472
  * 

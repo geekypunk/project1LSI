@@ -84,13 +84,16 @@ public class Utils {
 		String output = null;
 	    try {  
             Process p = Runtime.getRuntime().exec("/opt/aws/bin/ec2-metadata --public-ipv4");  
+            p.waitFor();
             BufferedReader in = new BufferedReader(  
                                 new InputStreamReader(p.getInputStream()));  
             output = in.readLine(); 
             output = output.split(" ")[1];
         } catch (IOException e) {  
-            e.printStackTrace();  
-        }
+            LOGGER.info(Utils.getStackTrace(e)); 
+        } catch (InterruptedException e) {
+        	LOGGER.info(Utils.getStackTrace(e)); 
+		}
 	    return output;
     } 
 	

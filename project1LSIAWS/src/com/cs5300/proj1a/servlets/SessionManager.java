@@ -128,7 +128,7 @@ public class SessionManager extends HttpServlet {
 						Utils.getCurrentTimeInMillis() + cookieAge);
 				sessionObj.setMessage(DEFAULT_MSG);
 				String sessionID = sessionObj.getSessionId();
-				System.out.println("Creating session:" + sessionID);
+				LOGGER.info("Creating session:" + sessionID);
 				String tuple = sessionID + Constants.delimiter
 						+ sessionObj.getVersion() + Constants.delimiter;
 				// since its a new session object, primary server = local
@@ -141,7 +141,7 @@ public class SessionManager extends HttpServlet {
 					new_backup = rpcClient.sessionWriteClient(
 							new HashSet<String>(), sessionID,
 							String.valueOf(sessionObj.getVersion()),
-							sessionObj.getMessage(), sessionObj.getExpirationTs(), resilenceFactor);
+							sessionObj.getMessage(), sessionObj.discardTs(), resilenceFactor);
 					for(String t : new_backup){
 						backupServer += t + '_';
 					}
@@ -161,7 +161,7 @@ public class SessionManager extends HttpServlet {
 				sessionTable.put(sessionID, sessionObj);
 
 				response.addCookie(c);
-				responseWriter.write(sessionObj.toString() + "@" + c.getValue());
+				responseWriter.write(sessionObj.toString() + "@" + c.getValue() + "@" + Utils.SERVER_IP);
 
 			} else {
 
@@ -194,7 +194,7 @@ public class SessionManager extends HttpServlet {
 					// Causes cookie to be removed from the browser
 					c.setMaxAge(0);
 
-					System.out.println("Logging out of session:"
+					LOGGER.info("Logging out of session:"
 							+ sessionIdFromCookie);
 					response.addCookie(c);
 				} else {
@@ -245,7 +245,7 @@ public class SessionManager extends HttpServlet {
 						new_backup.addAll(rpcClient.sessionWriteClient(
 								new HashSet<String>(), sessionID,
 								String.valueOf(sessionObj.getVersion()),
-								sessionObj.getMessage(), sessionObj.getExpirationTs(), (resilenceFactor - new_backup.size())));			
+								sessionObj.getMessage(), sessionObj.discardTs(), (resilenceFactor - new_backup.size())));			
 						
 					}
 					
@@ -267,7 +267,7 @@ public class SessionManager extends HttpServlet {
 					}
 
 					sessionObj.incrementVersionNo();
-					sessionObj.setExpirationTs(Utils.getCurrentTimeInMillis()
+					sessionObj.setDiscardTs(Utils.getCurrentTimeInMillis()
 							+ cookieAge + SessionObject.DELTA);
 					if (Utils.SERVER_IP.equals(primaryServer)
 							|| new_backup.contains(Utils.SERVER_IP)) {
@@ -278,11 +278,11 @@ public class SessionManager extends HttpServlet {
 					rpcClient.sessionWriteClient(new HashSet<String>(
 							destinationAddresses), sessionID, String
 							.valueOf(sessionObj.getVersion()), sessionObj
-							.getMessage(), sessionObj.getExpirationTs(), resilenceFactor);
+							.getMessage(), sessionObj.discardTs(), resilenceFactor);
 					result = sessionObj.toString();
 					
 
-					System.out.println("Creating session:" + sessionID
+					LOGGER.info("Creating session:" + sessionID
 							+ " with version " + (Integer.valueOf(version) + 1));
 					// Old cookie is overwritten, all new requests will be
 					// handled using this cookie.
@@ -291,7 +291,7 @@ public class SessionManager extends HttpServlet {
 					c.setMaxAge(cookieAge / 1000);
 					response.addCookie(c);
 
-					responseWriter.write(result + "@" + c.getValue());
+					responseWriter.write(result + "@" + c.getValue()+ "@" + Utils.SERVER_IP);
 				}
 
 

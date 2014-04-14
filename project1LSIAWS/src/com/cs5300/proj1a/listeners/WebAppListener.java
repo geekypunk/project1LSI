@@ -24,7 +24,12 @@ import com.cs5300.proj1b.views.ServerView;
 
 /**
  * This class is used for setting up the daemon tasks, like view updates,garbage collection etc.
- *
+ * <p><b>Actions being done:</b></p>
+ * <p>-->Get and cache the EC2 instance public IP</p>
+ * <p>-->Get the resilience factor from the properties file</p>
+ * <p>-->Initilize the server and bootstrap views and put them in ServletContext</p>
+ * <p>-->Initialization of all daemons</p>
+ * @see ServletContextListener#contextInitialized(ServletContextEvent)
  */
 @WebListener
 public class WebAppListener implements ServletContextListener {
@@ -33,7 +38,7 @@ public class WebAppListener implements ServletContextListener {
 	private final static Logger LOGGER = Logger.getLogger(WebAppListener.class.getName());
 	
 	// Time intervals in which session cleanup daemon(Garbage collection) is invoked 
-	private static int CLEANUP_INTERVAL = 300*1000; 
+	private static int CLEANUP_INTERVAL = 100*1000; 
 	
 	// Time intervals in which BootStrapViewUpdate daemon is invoked 
 	private static final int BOOT_SERVER_UPDATE_SECS = 15*1000; 
@@ -52,6 +57,7 @@ public class WebAppListener implements ServletContextListener {
 	/**
 	 * <p><b>Actions being done:</b></p>
 	 * <p>-->Get and cache the EC2 instance public IP</p>
+	 * <p>-->Get the resilience factor from the properties file</p>
 	 * <p>-->Initilize the server and bootstrap views and put them in ServletContext</p>
 	 * <p>-->Initialization of all daemons</p>
      * @see ServletContextListener#contextInitialized(ServletContextEvent)
@@ -62,15 +68,18 @@ public class WebAppListener implements ServletContextListener {
     		Random generator = new Random();
     		ServletContext ctx = sce.getServletContext();
     		
-    		//Load properties file. For now it has 1 parameter indicating k-resilience
+    		//Load properties file.
     		Properties config = new Properties();
     		config.load(ctx.getResourceAsStream("/WEB-INF/config.properties"));
+    		
+    		//Setting the resilience factor
     		ctx.setAttribute("resilienceFactor", Integer.parseInt(config.getProperty("K_RESILIENCE_PARAM")));
-			//Change for AWS/Local machine
+			
+    		//Change for AWS/Local machine
 	    	Utils.SERVER_IP = Utils.getPublicIP();
 	    	
 	    	//Put Bootstrap view in context
-	    	BootStrapView bootStrapView = new BootStrapView();
+	    	BootStrapView bootStrapView = new BootStrapView(config.getProperty("SIMPLEDB_REGION_CODE"));
 	    	//bootStrapView.insert(Utils.SERVER_IP);
 	    	ctx.setAttribute("bootStrapView", bootStrapView);
 	    	
@@ -83,7 +92,7 @@ public class WebAppListener implements ServletContextListener {
 	    	//Garbage collection
 	    	Timer time = new Timer(); // Instantiate Timer Object
 	    	SessionCleanUpDaemon st = new SessionCleanUpDaemon(); // Instantiate SheduledTask class
-			time.schedule(st, 0, (CLEANUP_INTERVAL/2) + generator.nextInt( CLEANUP_INTERVAL )); // Create Repetitively task for every 1 secs
+			time.schedule(st, 0, (CLEANUP_INTERVAL/2) + generator.nextInt( CLEANUP_INTERVAL )); 
 			
 			//Start BootStrap view update daemon
 			Timer timer2 = new Timer();

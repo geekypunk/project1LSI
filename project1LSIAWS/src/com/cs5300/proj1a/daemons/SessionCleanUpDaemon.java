@@ -31,8 +31,8 @@ public class SessionCleanUpDaemon extends TimerTask{
 		while (it.hasNext()) {
 		  Map.Entry<String,SessionObject> entry = it.next();
 		  sObj = entry.getValue();
-		   if(currentTimeInMillis>=sObj.getExpirationTs()){
-		   System.out.println("Cleaning up:"+sObj.getSessionId());
+		   if(currentTimeInMillis>=sObj.discardTs()){
+			   LOGGER.info("Cleaning up:"+sObj.getSessionId());
 		   it.remove();
 		  }
 		}

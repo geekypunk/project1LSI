@@ -34,6 +34,9 @@ public class BootStrapView {
 	private static final String DOMAIN = "BootStrapView";
 	private static final String ITEM_NAME = "svrIDs";
 	private static final String ATTR_NAME = "IPs";
+	/**
+	 * Default constructor. Region is Oregon
+	 */
 	public BootStrapView(){
 		AWSCredentialsProvider credentialsProvider = new ClasspathPropertiesFileCredentialsProvider();
 		simpleDBClient = new AmazonSimpleDBClient(credentialsProvider);
@@ -44,6 +47,18 @@ public class BootStrapView {
 	public BootStrapView(AWSCredentialsProvider credentialsProvider,Region usWest2){
 		simpleDBClient = new AmazonSimpleDBClient(credentialsProvider);
 		simpleDBClient.setRegion(usWest2);
+	}
+	
+	/**
+	 * Get the BootStrap view in SimpleDB by specifying the region code
+	 * @param regionCode
+	 */
+	public BootStrapView(String regionCode){
+		AWSCredentialsProvider credentialsProvider = new ClasspathPropertiesFileCredentialsProvider();
+		simpleDBClient = new AmazonSimpleDBClient(credentialsProvider);
+		Regions s = Regions.fromName(regionCode);
+		Region region = Region.getRegion(s);
+		simpleDBClient.setRegion(region);
 	}
 	
 	/**
@@ -63,6 +78,10 @@ public class BootStrapView {
 		return _bootStrapView; 
 	}
 	
+	/**
+	 * Insert the serverID(svrID) into the BootStrap View 
+	 * @param svrID
+	 */
 	public void insert(String svrID){
 		GetAttributesRequest getAttributesRequest = new GetAttributesRequest(DOMAIN,ITEM_NAME);
 		GetAttributesResult result = simpleDBClient.getAttributes(getAttributesRequest);
@@ -91,6 +110,9 @@ public class BootStrapView {
         simpleDBClient.putAttributes(putAttributesRequest);
 	}
 	
+	/**
+	 * Clear the BootStrap view. Set to an empty string 
+	 */
 	public void clearView(){
 		PutAttributesRequest putAttributesRequest = new PutAttributesRequest();
 		putAttributesRequest.setDomainName(DOMAIN);
@@ -102,6 +124,10 @@ public class BootStrapView {
         simpleDBClient.putAttributes(putAttributesRequest);
 	}
 	
+	/**
+	 * Replace the BootStrap view with the given {@link com.cs5300.proj1b.views.ServerView ServerView} object
+	 * @param _view
+	 */
 	public void replaceView(ServerView _view){
 		
 		String currentView = _view.toString();

@@ -1,7 +1,5 @@
 package com.cs5300.proj1.test;
 
-import java.util.ArrayList;
-
 import com.cs5300.proj1b.views.BootStrapView;
 
 
@@ -26,14 +24,19 @@ public class AWSSimpleDB {
 			backupServer = backupServer.substring(0, backupServer.length() - 1);
 		}
 		System.out.println(backupServer);*/
+		//Regions s = Regions.fromName("us-west-1");
+		//Region usWest2 = Region.getRegion(s);
+		//System.out.println(usWest2.getName());
 		clearBootStrap();
 	}
 	private static void clearBootStrap(){
-		BootStrapView view  = new BootStrapView();
+		
+		BootStrapView view  = new BootStrapView("us-west-2");
 		System.out.println(view.getAsServerView());
 		view.clearView();
 		System.out.println(view.getAsServerView());
 		System.out.println("...........");
+		
 		
 	}
 	/*

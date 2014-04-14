@@ -12,6 +12,7 @@ public class SessionObject {
 	
 	private String sessionId;
 	private int version;
+	private long discardTs;
 	private long expirationTs;
 	private String message;
 	public static final long DELTA= 5 * 1000;
@@ -21,7 +22,8 @@ public class SessionObject {
 		this.sessionId = Utils.sessionNumber+"_"+Utils.SERVER_IP;
 		this.version = 0;
 		this.message = message;
-		this.expirationTs = expTs+DELTA;
+		this.setExpirationTs(expTs);
+		this.discardTs = expTs+DELTA;
 		Utils.sessionNumber++;
 	}
 	/**
@@ -49,26 +51,50 @@ public class SessionObject {
 		this.version = version;
 	}
 	/**
-	 * @return the timeStamp
+	 * @return the expirationTs
 	 */
 	public long getExpirationTs() {
 		return expirationTs;
 	}
 	/**
-	 * @param timeStamp the timeStamp to set
+	 * @param expirationTs the expirationTs to set
 	 */
-	public void setExpirationTs(long timeStamp) {
-		this.expirationTs = timeStamp;
+	public void setExpirationTs(long expirationTs) {
+		this.expirationTs = expirationTs;
+	}
+	
+	/**
+	 * @return the discard timeStamp
+	 */
+	public long discardTs() {
+		return discardTs;
+	}
+	/**
+	 * Set the discard timestamp
+	 * @param timeStamp 
+	 */
+	public void setDiscardTs(long timeStamp) {
+		this.discardTs = timeStamp;
 	}
 
 	/**
-	 * Returns the expiration times for this session object
+	 * Returns the discard time for this session object
+	 * @return Date expirationTs
+	 */
+	public Date getDiscardDate(){
+		Date date=new Date(this.discardTs);
+		return date;
+	}
+	
+	/**
+	 * Returns the discard time for this session object
 	 * @return Date expirationTs
 	 */
 	public Date getExpirationDate(){
 		Date date=new Date(this.expirationTs);
 		return date;
 	}
+	
 	/**
 	 * This method returns the sessionID along with the version number appended to it. This value is primarly used as a key 
 	 * in the sessionTable
@@ -100,6 +126,6 @@ public class SessionObject {
 	
 	@Override
 	public String toString(){
-		return this.getMessage()+"|"+this.getExpirationDate()+"|"+this.getSessionId();
+		return this.getMessage()+"|"+this.getExpirationDate()+"|"+this.getDiscardDate()+"|"+this.getSessionId();
 	}
 }
