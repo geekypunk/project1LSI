@@ -235,7 +235,7 @@ public class SessionManager extends HttpServlet {
 						String foundVersion = String.valueOf(Integer
 								.parseInt(data[2]));
 						String message = data[3];
-						sessionObj= new SessionObject(sessionId,version,
+						sessionObj= new SessionObject(sessionID,version,
 								message);
 						sessionObj.setVersion(Integer.valueOf(foundVersion));
 						}
@@ -247,7 +247,8 @@ public class SessionManager extends HttpServlet {
 					sessionObj.incrementVersionNo();
 					sessionObj.setDiscardTs(Utils.getCurrentTimeInMillis()
 							+ cookieAge + SessionObject.DELTA);
-					
+					sessionObj.setExpirationTs(Utils.getCurrentTimeInMillis()
+							+ cookieAge);
 					
 					if(new_backup.size() < resilenceFactor){
 						new_backup.addAll(rpcClient.sessionWriteClient(

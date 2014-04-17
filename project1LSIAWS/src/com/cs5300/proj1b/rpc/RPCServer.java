@@ -136,15 +136,16 @@ public class RPCServer implements Runnable {
 		try {
 			// sesion id, new version, local, primary, backup
 			String sessionID = parts[2];
+			String version = parts[3];
 			String message = parts[4];
 			String discardTime = parts[5];
 			LOGGER.info("Received SESSION_WRITE request for session ID "
 					+ sessionID);
 
-			
-			// Create a new session object, with the given data
-			SessionObject sessionObject = new SessionObject(message,
-					Long.valueOf(discardTime));
+			// Create the session object, with the given data
+			SessionObject sessionObject = new SessionObject(sessionID,version,message);
+			sessionObject.setDiscardTs(Long.valueOf(discardTime));
+			sessionObject.setExpirationTs(Long.valueOf(discardTime)-SessionObject.DELTA);
 //			sessionObject.incrementVersionNo();
 
 			// Replace the existing session information with the new version,

@@ -77,7 +77,6 @@ public class GetViews extends HttpServlet {
 			responseHTML+=bootStrapView.getAsServerView().toString();
 			Set<String> view = serverView.getView();
 			responseHTML+="|"+view.toString();
-			responseCookie.setMaxAge(cookieAge/1000);
 			response.addCookie(responseCookie);
 	    }else{
 	    	responseHTML = "NoCookie";

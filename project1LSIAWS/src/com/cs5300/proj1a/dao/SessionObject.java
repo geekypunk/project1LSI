@@ -27,7 +27,7 @@ public class SessionObject {
 		Utils.sessionNumber++;
 	}
 	
-public SessionObject(String sessionID, String version, String message) throws Exception{
+	public SessionObject(String sessionID, String version, String message) throws Exception{
 		this.sessionId = sessionID;
 		this.version = Integer.valueOf(version);
 		this.message = message;

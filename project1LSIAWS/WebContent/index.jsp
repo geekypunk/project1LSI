@@ -57,18 +57,7 @@
 		<b>Discard time :</b>
 		<p id="cookieDiscardTime"></p>
 		
-		<div>
-			<b>Bootstrap View :</b> <br />
-			<p id="bootStrapView"></p>
-			<br /> <b>Server View :</b> <br />
-			<p id="serverView"></p>
-			<br />
-		</div>
-		<button class="btn btn-default btn-sm" id="refreshViews">
-			<span class="glyphicon glyphicon-refresh"></span> Reload Views
-		</button>
-				
-			<div class="col-lg-4">
+		<div class="col-lg-4">
 				<div class="input-group">
 					<span class="input-group-btn">
 						<button class="btn btn-default btn-sm" type="button" id="replace">
@@ -79,18 +68,32 @@
 				</div>
 			</div>
 		
-	
+		&nbsp;&nbsp;&nbsp;
 
 		<button class="btn btn-default btn-sm" id="refresh">
 			<span class="glyphicon glyphicon-refresh"></span> Refresh
 		</button>
-		&nbsp;
+		&nbsp;&nbsp;&nbsp;
 
 
 		<button class="btn btn-default btn-sm" id="logout">
 			<span class="glyphicon glyphicon-log-out"></span> Logout
 		</button>
-
+		
+		<hr>
+		<button class="btn btn-default btn-sm" id="refreshViews">
+			<span class="glyphicon glyphicon-refresh"></span> Reload Views
+		</button>
+		<div>
+			<b>Bootstrap View :</b> 
+			<p id="bootStrapView"></p>
+			<b>Server View :</b>
+			<p id="serverView"></p>
+			<br />
+		</div>
+		
+				
+			
 
 
 
